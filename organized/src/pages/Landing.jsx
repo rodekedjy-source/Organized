@@ -368,11 +368,11 @@ export default function Landing() {
             <div className="hero-label-line"/>
           </div>
           <h1 className="hero-h1">
-      you're losing clients<br/><em>every week</em><br/>because your<br/>bookings <br/>are a <em>mess.</em>
+      you're losing clients<br/><em>every week</em><br/>because your<br/>bookings <br/>are <em>messy.</em>
           </h1>
           <div className="hero-divider"/>
           <p className="hero-sub">
-            Organized gives you a simple system to <strong>manage bookings,clients,payments </strong> all in <strong>One</strong>.
+            Organized gives you a simple way to <strong>manage bookings,clients,payments </strong> all in <strong>One</strong>.
           </p>
           <div className="hero-actions">
             <button className="btn-gold-lg" onClick={()=>navigate('/auth')}>Start free — no card needed</button>
