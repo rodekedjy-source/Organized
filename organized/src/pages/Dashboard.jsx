@@ -73,7 +73,15 @@ export default function Dashboard({ session }) {
             <div className="db-nav-item" onClick={handleSignOut}>Sign out</div>
             <div className="db-sidebar-footer">
               <div className="db-plan-label">Pro Plan</div>
-              <div className="db-plan-sub">beorganized.io/{workspace?.slug || '...'}</div>
+             <a 
+  className="db-plan-sub db-slug-link" 
+  href={workspace?.slug ? `https://beorganized.io/${workspace.slug}` : undefined}
+  target="_blank" 
+  rel="noopener noreferrer"
+  onClick={e => { if (!workspace?.slug) e.preventDefault() }}
+>
+  beorganized.io/{workspace?.slug || '...'}
+</a>
               <div className="db-plan-bar"><div className="db-plan-fill"/></div>
             </div>
           </aside>
@@ -928,3 +936,5 @@ const css = `
 .db-toast{position:fixed;bottom:1.75rem;right:1.75rem;background:var(--ink);color:#fff;padding:.85rem 1.4rem;border-radius:9px;font-size:.82rem;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.2);border-left:3px solid var(--gold);}
 @media(max-width:600px){.db-stats-row{grid-template-columns:repeat(2,1fr);}.db-grid-3{grid-template-columns:repeat(2,1fr);}.db-main{padding:1.25rem;}.db-page-head{flex-direction:column;align-items:flex-start;}.db-tbl th,.db-tbl td{padding:.6rem .75rem;font-size:.75rem;}}
 `
+.db-slug-link{display:block;color:var(--ink-3);text-decoration:none;transition:color .15s;}
+.db-slug-link:hover{color:var(--gold);text-decoration:underline;cursor:pointer;}
