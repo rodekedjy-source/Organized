@@ -258,8 +258,11 @@ export default function Auth({ onAuth }) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setError('Session expired. Please sign in again.'); setLoading(false); return }
 
-      await supabase.from('users').upsert({
-        id: user.id, full_name: form.full_name, email: form.email,
+     await supabase.from('users').upsert({
+  id: user.id,
+  full_name: form.full_name,
+  email: form.email,
+  onboarding_complete: true,
       })
 
       const slug = form.business_name.toLowerCase()
@@ -273,8 +276,7 @@ export default function Auth({ onAuth }) {
         slug,
       })
 
-      await supabase.auth.signOut()
-      setStep(5)
+     navigate('/dashboard')
     } catch(err) {
       setError('Something went wrong. Please try again.')
     }
