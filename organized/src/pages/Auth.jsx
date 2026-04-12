@@ -247,42 +247,69 @@ export default function Auth({ onAuth }) {
     setStep(4)
   }
 
-  // ── STEP 4 — Location + Create workspace ────────────────────
-  async function submitStep4(e) {
-    e.preventDefault()
-    setError('')
-    if (!form.country) return setError('Please select your country.')
-    if (!form.city.trim()) return setError('Please enter your city.')
-    setLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setError('Session expired. Please sign in again.'); setLoading(false); return }
+ // ── STEP 4 — Location + Create workspace ────────────────────
 
-     await supabase.from('users').upsert({
-  id: user.id,
-  full_name: form.full_name,
-  email: form.email,
-  onboarding_complete: true,
-      })
+async function submitStep4(e) {
+  e.preventDefault()
+  setError('')
+  if (!form.country) return setError('Please select your country.')
+  if (!form.city.trim()) return setError('Please enter your city.')
 
-      const slug = form.business_name.toLowerCase()
-        .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-        + '-' + Math.random().toString(36).slice(2, 6)
-
-      await supabase.from('workspaces').upsert({
-        user_id: user.id, name: form.business_name,
-        tagline: form.tagline, email: form.business_email,
-        location: `${form.city}${form.province ? ', ' + form.province : ''}, ${form.country}`,
-        slug,
-        is_published: true,
-      })
-
-     navigate('/dashboard')
-    } catch(err) {
-      setError('Something went wrong. Please try again.')
+  setLoading(true)
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setError('Session expired. Please sign in again.')
+      setLoading(false)
+      return
     }
-    setLoading(false)
+
+    // ── 1. Upsert public user row ── onboarding_complete: true ✅
+    const { error: userErr } = await supabase.from('users').upsert({
+      id: user.id,
+      full_name: form.full_name,
+      email: form.email,
+      onboarding_complete: true,          // FIX #1 — was missing
+    })
+    if (userErr) throw userErr
+
+    // ── 2. Lookup workspace_type_id from slug ──────────────────
+    const { data: wtData } = await supabase
+      .from('workspace_types')
+      .select('id')
+      .eq('slug', form.business_type)
+      .single()
+
+    // ── 3. Create workspace ────────────────────────────────────
+    const slug =
+      form.business_name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '') +
+      '-' +
+      Math.random().toString(36).slice(2, 6)
+
+    const { error: wsErr } = await supabase.from('workspaces').upsert({
+      user_id: user.id,
+      name: form.business_name,
+      tagline: form.tagline,
+      email: form.business_email,
+      location: `${form.city}${form.province ? ', ' + form.province : ''}, ${form.country}`,
+      slug,
+      workspace_type_id: wtData?.id ?? null,  // FIX #2 — was never saved
+    })
+    if (wsErr) throw wsErr
+
+    // ── 4. Navigate directly — no signOut ──────────────────────
+    // FIX #3 — was: await supabase.auth.signOut() + setStep(5)
+    navigate('/dashboard')
+
+  } catch (err) {
+    setError('Something went wrong. Please try again.')
+    console.error(err)
   }
+  setLoading(false)
+}
 
   // ── LOGIN ───────────────────────────────────────────────────
  async function submitLogin(e) {
