@@ -29,30 +29,52 @@ export default function App() {
   }
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 3000)
+  const timeout = setTimeout(() => {
+    setLoading(false)
+  }, 3000)
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) {
-        try { await fetchProfile(session.user.id) } catch {}
-      }
+  supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+    // Si erreur de token → on nettoie et on continue
+    if (error) {
+      await supabase.auth.signOut()
       clearTimeout(timeout)
       setLoading(false)
-    }).catch(() => { clearTimeout(timeout); setLoading(false) })
+      return
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session)
-        if (session?.user) {
-          try { await fetchProfile(session.user.id) } catch { setProfile(null) }
-        } else {
-          setProfile(null)
-        }
+    setSession(session)
+    if (session?.user) {
+      try { await fetchProfile(session.user.id) } catch {}
+    }
+    clearTimeout(timeout)
+    setLoading(false)
+  }).catch(async () => {
+    await supabase.auth.signOut()
+    clearTimeout(timeout)
+    setLoading(false)
+  })
+
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      // Token invalide → force sign out propre
+      if (event === 'TOKEN_REFRESHED' && !session) {
+        await supabase.auth.signOut()
+        setSession(null)
+        setProfile(null)
+        return
       }
-    )
+      setSession(session)
+      if (session?.user) {
+        try { await fetchProfile(session.user.id) } catch { setProfile(null) }
+      } else {
+        setProfile(null)
+      }
+    }
+  )
 
-    return () => { subscription.unsubscribe(); clearTimeout(timeout) }
-  }, [])
+  return () => { subscription.unsubscribe(); clearTimeout(timeout) }
+}, [])
+
 
   if (loading) return <Splash />
 
