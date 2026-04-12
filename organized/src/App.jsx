@@ -28,7 +28,7 @@ export default function App() {
     setProfile(data)
   }
 
-  useEffect(() => {
+useEffect(() => {
   const timeout = setTimeout(() => {
     setLoading(false)
   }, 3000)
