@@ -20,26 +20,46 @@ export default function App() {
     setProfile(data)
   }
 
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) await fetchProfile(session.user.id)
-      setLoading(false)
-    })
+ useEffect(() => {
+  // Timeout de sécurité — si ça hang plus de 3 secondes, on force
+  const timeout = setTimeout(() => setLoading(false), 3000)
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session)
-        if (session?.user) {
+  supabase.auth.getSession().then(async ({ data: { session } }) => {
+    setSession(session)
+    if (session?.user) {
+      try {
+        await fetchProfile(session.user.id)
+      } catch {
+        // fetchProfile failed, on continue quand même
+      }
+    }
+    clearTimeout(timeout)
+    setLoading(false)
+  }).catch(() => {
+    clearTimeout(timeout)
+    setLoading(false)
+  })
+
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      setSession(session)
+      if (session?.user) {
+        try {
           await fetchProfile(session.user.id)
-        } else {
+        } catch {
           setProfile(null)
         }
+      } else {
+        setProfile(null)
       }
-    )
+    }
+  )
 
-    return () => subscription.unsubscribe()
-  }, [])
+  return () => {
+    subscription.unsubscribe()
+    clearTimeout(timeout)
+  }
+}, [])
 
   if (loading) return (
   < div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#ffffff' }}>
