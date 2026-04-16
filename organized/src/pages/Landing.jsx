@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useRef, useState } from "react"
 function useReveal() {
 useEffect(() => {
-const els = document.querySelectorAll([data-rv])
+const els = document.querySelectorAll("[data-rv]")
 const obs = new IntersectionObserver(entries => {
 entries.forEach(e => {
 if (!e.isIntersecting) return
 const el = e.target
-setTimeout(() => el.classList.add(‘in’), Number(el.dataset.delay || 0))
+setTimeout(() => el.classList.add("in"), Number(el.dataset.delay || 0))
 obs.unobserve(el)
 })
 }, { threshold: 0.1 })
