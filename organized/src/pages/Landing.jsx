@@ -275,13 +275,20 @@ button:active { transform: scale(.97) !important; }
 .btn-ghost-white:hover { color:rgba(255,255,255,.8); border-color:rgba(255,255,255,.3); }
 
 /* FOOTER */
-footer { background:#090907; padding:3rem; border-top:1px solid rgba(255,255,255,.04); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
+footer { background:#090907; padding:2.5rem 3rem; border-top:1px solid rgba(255,255,255,.04); display:flex; flex-direction:column; align-items:center; gap:2rem; }
+.f-top { width:100%; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; }
 .f-logo { font-family:'Playfair Display',serif; font-size:1.15rem; color:rgba(255,255,255,.25); }
 .f-logo span { color:var(--gold); }
 .f-links { display:flex; gap:2rem; }
 .f-link { font-size:.7rem; color:rgba(255,255,255,.18); cursor:pointer; transition:color .15s; }
 .f-link:hover { color:rgba(255,255,255,.45); }
+.f-bottom { width:100%; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; border-top:1px solid rgba(255,255,255,.04); padding-top:1.5rem; }
 .f-copy { font-size:.68rem; color:rgba(255,255,255,.1); }
+.f-socials { display:flex; align-items:center; gap:1rem; }
+.f-social { width:32px; height:32px; border-radius:8px; border:1px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; }
+.f-social:hover { border-color:rgba(181,137,58,.4); background:rgba(181,137,58,.06); }
+.f-social svg { width:15px; height:15px; fill:rgba(255,255,255,.28); transition:fill .2s; }
+.f-social:hover svg { fill:var(--gold); }
 
 @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
@@ -305,7 +312,7 @@ footer { background:#090907; padding:3rem; border-top:1px solid rgba(255,255,255
   .mirror{padding:5rem 1.5rem;}
   .phone-inner,.how-inner,.pricing-inner,.faq-inner,.beta-inner{padding:5rem 1.5rem;}
   .phone-section,.beta-section,.how-section,.pricing-section,.faq-section,.cta{padding:5rem 1.5rem;}
-  footer{padding:2rem 1.5rem;flex-direction:column;align-items:flex-start;}
+  footer{padding:2rem 1.5rem;}
   .beta-cta-box{padding:2rem 1.5rem;}
 }
 
@@ -508,12 +515,12 @@ export default function Landing() {
   }, [sfVisible, sfTyping])
 
   return (
-    <div translate="no">
+    <div>
       <style>{css}</style>
 
       {/* NAV */}
       <nav className={`nav ${scrolled?'scrolled':''}`}>
-        <div className="nav-logo" onClick={()=>navigate('/')}>Organized<span>.</span></div>
+        <div className="nav-logo" onClick={()=>navigate('/')}><span translate="no">Organized</span><span>.</span></div>
         <div className="nav-links">
           <span className="nav-link" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>How it works</span>
           <span className="nav-link" onClick={()=>document.getElementById('pricing')?.scrollIntoView({behavior:'smooth'})}>Pricing</span>
@@ -634,7 +641,7 @@ export default function Landing() {
             {/* BEFORE */}
             <div data-rv>
               <div style={{display:'flex',alignItems:'center',gap:'.75rem',marginBottom:'1.5rem'}}>
-                <div style={{background:'rgba(239,68,68,.12)',color:'#f87171',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(239,68,68,.2)'}}>Before Organized</div>
+                <div style={{background:'rgba(239,68,68,.12)',color:'#f87171',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(239,68,68,.2)'}}>Before <span translate="no">Organized</span></div>
               </div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.35rem',color:'rgba(255,255,255,.55)',marginBottom:'1.75rem',fontStyle:'italic',lineHeight:1.35,maxWidth:'320px'}}>
                 "23 unread DMs. 3 missed bookings. And it's only Monday."
@@ -714,7 +721,7 @@ export default function Landing() {
             {/* AFTER */}
             <div data-rv data-delay="150">
               <div style={{display:'flex',alignItems:'center',gap:'.75rem',marginBottom:'1.5rem'}}>
-                <div style={{background:'rgba(34,197,94,.1)',color:'#4ade80',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(34,197,94,.2)'}}>After Organized</div>
+                <div style={{background:'rgba(34,197,94,.1)',color:'#4ade80',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(34,197,94,.2)'}}>After <span translate="no">Organized</span></div>
               </div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.35rem',color:'rgba(255,255,255,.7)',marginBottom:'1.75rem',fontStyle:'italic',lineHeight:1.35,maxWidth:'320px'}}>
                 "Monday morning. 4 confirmed bookings. Phone still quiet."
@@ -724,7 +731,7 @@ export default function Landing() {
                   <div style={{width:70,height:10,background:'#e8e4dc',borderRadius:10}}/>
                 </div>
                 <div style={{background:'#fff',borderBottom:'1px solid #e8e4dc',padding:'.6rem .85rem',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                  <span style={{fontFamily:'Playfair Display,serif',fontSize:'.9rem',fontWeight:500,color:'#0f0e0c'}}>Organized<span style={{color:'#b5893a'}}>.</span></span>
+                  <span style={{fontFamily:'Playfair Display,serif',fontSize:'.9rem',fontWeight:500,color:'#0f0e0c'}}><span translate="no">Organized</span><span style={{color:'#b5893a'}}>.</span></span>
                   <div style={{width:26,height:26,borderRadius:'50%',background:'rgba(181,137,58,.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.6rem',fontWeight:700,color:'#b5893a'}}>L</div>
                 </div>
                 <div style={{background:'#fff',padding:'.5rem .75rem .3rem'}}>
@@ -770,9 +777,9 @@ export default function Landing() {
 
           <div data-rv="fade" className="lilas-quote" style={{textAlign:'center',marginTop:'4rem',padding:'2.5rem',background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'16px',maxWidth:'620px',margin:'4rem auto 0'}}>
             <p style={{fontSize:'1rem',fontFamily:'Playfair Display,serif',fontStyle:'italic',color:'rgba(255,255,255,.5)',marginBottom:'.75rem',lineHeight:1.5}}>
-              "This is the week thousands of service professionals are living right now. We built Organized to end it."
+              "This is the week thousands of service professionals are living right now. We built <span translate="no">Organized</span> to end it."
             </p>
-            <div className="lilas-attr" style={{fontSize:'.75rem',color:'rgba(255,255,255,.2)',letterSpacing:'.04em'}}>— The Organized. team</div>
+            <div className="lilas-attr" style={{fontSize:'.75rem',color:'rgba(255,255,255,.2)',letterSpacing:'.04em'}}>— The <span translate="no">Organized.</span> team</div>
           </div>
         </div>
       </div>
@@ -783,7 +790,7 @@ export default function Landing() {
           <div className="phone-text" data-rv="left">
             <div className="sec-tag"><div className="sec-tag-line"/><span className="sec-tag-text">Your public profile</span></div>
             <h2 className="phone-h2">One link.<br/><em>Everything they need.</em></h2>
-            <p className="phone-desc">Drop it in your bio. Your clients book appointments, shop your products, and enroll in your courses — <strong style={{color:'var(--ink)',fontWeight:400}}>without ever DMing you.</strong> You focus on the craft. Organized handles everything else.</p>
+            <p className="phone-desc">Drop it in your bio. Your clients book appointments, shop your products, and enroll in your courses — <strong style={{color:'var(--ink)',fontWeight:400}}>without ever <span translate="no">DM</span>ing you.</strong> You focus on the craft. <span translate="no">Organized</span> handles everything else.</p>
             <div className="phone-points">
               {[
                 {icon:'📅',title:'Appointments booked 24/7',desc:'Real-time availability. Automated confirmations. Zero back-and-forth.'},
@@ -828,7 +835,7 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                <div className="ip-footer"><div className="ip-powered">Powered by Organized.</div></div>
+                <div className="ip-footer"><div className="ip-powered">Powered by <span translate="no">Organized.</span></div></div>
               </div>
             </div>
           </div>
@@ -888,7 +895,7 @@ export default function Landing() {
                 {/* Top bar */}
                 <div style={{background:'#f5f4f0',padding:'.5rem .7rem',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0,borderBottom:'1px solid rgba(0,0,0,.05)'}}>
                   <span style={{fontSize:'13px',color:'var(--ink-3)',lineHeight:1}}>☰</span>
-                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'.78rem',fontWeight:500,color:'var(--ink)'}}>Organized<span style={{color:'var(--gold)'}}>.</span></div>
+                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'.78rem',fontWeight:500,color:'var(--ink)'}}><span translate="no">Organized</span><span style={{color:'var(--gold)'}}>.</span></div>
                   <div style={{display:'flex',gap:'3px',background:'rgba(0,0,0,.07)',borderRadius:'8px',padding:'2px'}}>
                     <div style={{fontSize:'.42rem',fontWeight:600,color:'var(--ink)',background:'#fff',borderRadius:'6px',padding:'2px 7px',boxShadow:'0 1px 3px rgba(0,0,0,.1)'}}>Dash</div>
                     <div style={{fontSize:'.42rem',color:'var(--ink-3)',padding:'2px 7px'}}>Client</div>
@@ -1279,11 +1286,33 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer>
-        <div className="f-logo">Organized<span>.</span></div>
-        <div className="f-links">
-          {['Privacy','Terms','Contact','Instagram'].map(l=><span key={l} className="f-link">{l}</span>)}
+        <div className="f-top">
+          <div className="f-logo"><span translate="no">Organized</span><span>.</span></div>
+          <div className="f-links">
+            {['Privacy','Terms','Contact'].map(l=><span key={l} className="f-link">{l}</span>)}
+          </div>
         </div>
-        <div className="f-copy">© 2026 Organized — beorganized.io</div>
+        <div className="f-bottom">
+          <div className="f-copy">© 2026 <span translate="no">Organized</span> — beorganized.io</div>
+          <div className="f-socials">
+            {/* Instagram */}
+            <a className="f-social" href="https://instagram.com/beorganized.io" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            {/* TikTok */}
+            <a className="f-social" href="https://tiktok.com/@beorganized.io" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+              <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
+            </a>
+            {/* Facebook */}
+            <a className="f-social" href="https://facebook.com/beorganized" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            {/* X / Twitter */}
+            <a className="f-social" href="https://x.com/beorganized" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+              <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   )
