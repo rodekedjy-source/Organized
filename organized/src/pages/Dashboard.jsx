@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 // ── TRANSLATIONS ──────────────────────────────────────────────────────────────
@@ -1677,6 +1677,115 @@ function Services({ workspace, toast, lang='en' }) {
   )
 }
 
+// ── AI ENHANCE MODAL ──────────────────────────────────────────────────────────
+function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, toast }) {
+  const [style, setStyle]           = useState('studio')
+  const [phase, setPhase]           = useState('pick')
+  const [results, setResults]       = useState([])
+  const [loadingMsg, setLoadingMsg] = useState('')
+  const EDGE = 'https://bwfpioxvfqwnwzkvtebg.supabase.co/functions/v1/enhance-product-image'
+
+  async function getToken() { const{data}=await supabase.auth.getSession(); return data?.session?.access_token }
+  async function call(body, token) {
+    const res = await fetch(EDGE, { method:'POST', headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}, body:JSON.stringify(body) })
+    return res.json()
+  }
+  async function waitFor(reqId, token) {
+    while (true) {
+      await new Promise(r => setTimeout(r, 3500))
+      const s = await call({ action:'status', request_id:reqId }, token)
+      if (s.status==='COMPLETED') { const r = await call({ action:'result', request_id:reqId }, token); return r.images?.[0]?.url }
+      if (s.status==='FAILED') throw new Error('Generation failed')
+    }
+  }
+  async function run() {
+    setPhase('loading'); setLoadingMsg('Preparing image...')
+    try {
+      const token = await getToken()
+      setLoadingMsg('AI is crafting your images...')
+      const { request_ids, error } = await call({
+        action: 'submit',
+        image_url: imageUrl,
+        style,
+        product_description: 'professional hair and beauty care product'
+      }, token)
+      if (error) throw new Error(error)
+      setLoadingMsg('Finalising enhanced photos...')
+      const urls = await Promise.all(request_ids.map(id => waitFor(id, token)))
+      setResults(urls); setPhase('results')
+    } catch (e) { toast('Enhancement failed — ' + e.message); setPhase('pick') }
+  }
+  async function pick(url) {
+    try {
+      const res  = await fetch(url)
+      const blob = await res.blob()
+      // Re-upload enhanced image to our storage so it's permanent
+      const ext  = 'jpg'
+      const path = `${workspace.id}/enhanced-${Date.now()}.${ext}`
+      await supabase.storage.from('product-images').upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+      const { data: ud } = supabase.storage.from('product-images').getPublicUrl(path)
+      onSelect(ud.publicUrl || url)
+      onClose()
+    } catch (e) { toast('Could not save enhanced image: ' + e.message) }
+  }
+  const labels = { studio:['Front view','Angled view'], glamour:['Cosmetic scene','Wellness scene'] }
+
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1050,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}}>
+      <style>{`@keyframes spin-en{to{transform:rotate(360deg)}}`}</style>
+      <div style={{background:'var(--surface)',borderRadius:'20px',width:'100%',maxWidth:'480px',overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.4)'}}>
+        <div style={{padding:'1.2rem 1.5rem',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div style={{fontSize:'1rem',fontWeight:600,fontFamily:"'Playfair Display',serif"}}>✨ AI Photo Enhancement</div>
+            <div style={{fontSize:'.75rem',color:'var(--ink-3)',marginTop:'.15rem'}}>Transform your photo into a professional visual</div>
+          </div>
+          <button onClick={onClose} style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'8px',width:30,height:30,cursor:'pointer',color:'var(--ink-3)',fontSize:'1.1rem',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+        </div>
+        <div style={{padding:'1.4rem'}}>
+          {phase==='pick' && (<>
+            <img src={imagePreview||imageUrl} style={{width:'100%',height:140,objectFit:'cover',borderRadius:10,marginBottom:'1.25rem'}} alt="product"/>
+            <div style={{fontSize:'.7rem',fontWeight:700,color:'var(--ink-3)',marginBottom:'.65rem',textTransform:'uppercase',letterSpacing:'.08em'}}>Choose a style</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.65rem',marginBottom:'1.25rem'}}>
+              {[{v:'studio',label:'Studio',desc:'Clean background, sharp lighting',ico:'🏛'},{v:'glamour',label:'Glamour',desc:'Marble, bokeh, luxury spa',ico:'✨'}].map(o=>(
+                <div key={o.v} onClick={()=>setStyle(o.v)}
+                  style={{border:`2px solid ${style===o.v?'var(--gold)':'var(--border)'}`,borderRadius:12,padding:'.85rem',cursor:'pointer',background:style===o.v?'var(--gold-lt)':'var(--bg)',transition:'all .15s'}}>
+                  <div style={{fontSize:'1.3rem',marginBottom:'.3rem'}}>{o.ico}</div>
+                  <div style={{fontWeight:600,fontSize:'.85rem',color:'var(--ink)'}}>{o.label}</div>
+                  <div style={{fontSize:'.72rem',color:'var(--ink-3)',marginTop:'.15rem',lineHeight:1.4}}>{o.desc}</div>
+                </div>
+              ))}
+            </div>
+            <button onClick={run} style={{width:'100%',padding:'.85rem',background:'linear-gradient(135deg,#c5a66a,#a8863d)',color:'#fff',border:'none',borderRadius:10,fontWeight:600,fontSize:'.88rem',cursor:'pointer'}}>
+              Generate Enhanced Photos
+            </button>
+          </>)}
+          {phase==='loading' && (
+            <div style={{textAlign:'center',padding:'2.5rem 0'}}>
+              <div style={{width:44,height:44,borderRadius:'50%',border:'3px solid var(--border)',borderTopColor:'var(--gold)',animation:'spin-en 1s linear infinite',margin:'0 auto 1.1rem'}}/>
+              <div style={{fontWeight:600,color:'var(--ink)',marginBottom:'.35rem'}}>{loadingMsg}</div>
+              <div style={{fontSize:'.78rem',color:'var(--ink-3)'}}>This takes 20 – 40 seconds</div>
+            </div>
+          )}
+          {phase==='results' && (<>
+            <div style={{fontSize:'.7rem',fontWeight:700,color:'var(--ink-3)',marginBottom:'.65rem',textTransform:'uppercase',letterSpacing:'.08em'}}>Select your photo</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.65rem',marginBottom:'.85rem'}}>
+              {results.map((url,i)=>(
+                <div key={i} onClick={()=>pick(url)}
+                  style={{borderRadius:10,overflow:'hidden',cursor:'pointer',border:'2px solid var(--border)',transition:'border-color .15s',position:'relative'}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='var(--gold)'} onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}>
+                  <img src={url} style={{width:'100%',aspectRatio:'2/3',objectFit:'cover',display:'block'}} alt={`Option ${i+1}`}/>
+                  <div style={{position:'absolute',bottom:0,left:0,right:0,background:'linear-gradient(transparent,rgba(0,0,0,.55))',padding:'.4rem .55rem',fontSize:'.7rem',color:'#fff',fontWeight:500}}>{labels[style][i]}</div>
+                </div>
+              ))}
+            </div>
+            <button onClick={()=>{setPhase('pick');setResults([])}} style={{width:'100%',padding:'.65rem',background:'none',border:'1px solid var(--border)',borderRadius:9,color:'var(--ink-3)',cursor:'pointer',fontSize:'.82rem'}}>← Try a different style</button>
+          </>)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── PRODUCTS ──────────────────────────────────────────────────────────────────
 // Compress image client-side before upload — reduces 5MB phone photo to ~300KB
 async function compressImage(file, maxWidth=1400, quality=0.82) {
@@ -1721,7 +1830,7 @@ async function uploadProductImages(files, workspaceId) {
 }
 
 // ── Product image upload zone (shared UI) ────────────────────────────────────
-function ImageUploadZone({ pendingImgs, onSelect, onRemove, uploading }) {
+function ImageUploadZone({ pendingImgs, onSelect, onRemove, uploading, onEnhance }) {
   return (
     <div>
       <label style={{display:'block',border:'2px dashed var(--border-2)',borderRadius:12,padding:'1rem',textAlign:'center',cursor:'pointer',transition:'all .15s',background:'var(--bg)'}}
@@ -1743,6 +1852,16 @@ function ImageUploadZone({ pendingImgs, onSelect, onRemove, uploading }) {
               {img.error && <div style={{position:'absolute',inset:0,background:'rgba(192,57,43,.75)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.58rem',color:'#fff',fontWeight:600}}>Failed</div>}
               <button type="button" onClick={()=>onRemove(i)}
                 style={{position:'absolute',top:2,right:2,background:'rgba(0,0,0,.6)',border:'none',color:'#fff',width:17,height:17,borderRadius:'50%',cursor:'pointer',fontSize:'.55rem',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>✕</button>
+              {/* ✨ Enhance with AI — appears only when image is uploaded */}
+              {img.url && onEnhance && (
+                <button type="button" onClick={e=>{e.stopPropagation();onEnhance(i, img.url, img.preview||img.url)}}
+                  style={{position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',background:'linear-gradient(135deg,rgba(197,166,106,.95),rgba(168,134,61,.95))',border:'none',color:'#fff',borderRadius:20,padding:'2px 6px',fontSize:'.52rem',fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',letterSpacing:'.02em'}}>
+                  ✨ AI
+                </button>
+              )}
+              {img.enhanced && (
+                <div style={{position:'absolute',bottom:2,right:2,background:'var(--gold)',borderRadius:'50%',width:12,height:12,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.45rem',color:'#fff'}}>✓</div>
+              )}
             </div>
           ))}
         </div>
@@ -1771,6 +1890,7 @@ function ProductEditModal({ product, workspaceId, onClose, onSaved, onDeleted, t
   const [activeIdx, setActiveIdx] = useState(0)
   const [zoomed, setZoomed] = useState(false)
   const [tab, setTab] = useState('view') // 'view' | 'edit'
+  const [enhanceTarget, setEnhanceTarget] = useState(null) // {type:'existing'|'new', idx, url}
 
   const allImages = [...existingImgs.map(i=>i.url), ...newImgs.filter(i=>i.url).map(i=>i.url)]
 
@@ -1863,6 +1983,14 @@ function ProductEditModal({ product, workspaceId, onClose, onSaved, onDeleted, t
               </button>
             ))}
           </div>
+          {/* ✨ Enhance with AI button — on current photo */}
+          {allImages.length > 0 && (
+            <button
+              onClick={e=>{e.stopPropagation(); const url=allImages[Math.min(activeIdx,allImages.length-1)]; const isExisting=activeIdx<existingImgs.length; setEnhanceTarget({type:isExisting?'existing':'new',idx:isExisting?activeIdx:activeIdx-existingImgs.length,url})}}
+              style={{position:'absolute',bottom:10,right:10,background:'linear-gradient(135deg,rgba(197,166,106,.92),rgba(168,134,61,.92))',border:'none',color:'#fff',borderRadius:20,padding:'5px 12px',fontSize:'.7rem',fontWeight:700,cursor:'pointer',letterSpacing:'.03em',backdropFilter:'blur(4px)'}}>
+              ✨ Enhance with AI
+            </button>
+          )}
         </div>
 
         {/* Thumbnails */}
@@ -1937,7 +2065,8 @@ function ProductEditModal({ product, workspaceId, onClose, onSaved, onDeleted, t
             {/* Add new photos */}
             <div>
               <div style={{fontSize:'.72rem',fontWeight:600,color:'var(--ink-3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'.5rem'}}>Add more photos</div>
-              <ImageUploadZone pendingImgs={newImgs} onSelect={handleNewImages} onRemove={i=>setNewImgs(prev=>prev.filter((_,idx)=>idx!==i))} uploading={uploading}/>
+              <ImageUploadZone pendingImgs={newImgs} onSelect={handleNewImages} onRemove={i=>setNewImgs(prev=>prev.filter((_,idx)=>idx!==i))} uploading={uploading}
+                onEnhance={(i, url, preview) => setEnhanceTarget({type:'new', idx:i, url, preview})}/>
             </div>
 
             <div style={{display:'flex',gap:'.6rem',paddingTop:'.25rem'}}>
@@ -1953,6 +2082,24 @@ function ProductEditModal({ product, workspaceId, onClose, onSaved, onDeleted, t
         )}
 
       </div>
+      {enhanceTarget && (
+        <EnhanceModal
+          imageUrl={enhanceTarget.url}
+          imagePreview={enhanceTarget.preview||enhanceTarget.url}
+          workspace={{id: workspaceId}}
+          onSelect={newUrl => {
+            if (enhanceTarget.type === 'existing') {
+              setExistingImgs(prev => prev.map((img, i) => i===enhanceTarget.idx ? {url:newUrl,preview:newUrl} : img))
+            } else {
+              setNewImgs(prev => prev.map((img, i) => i===enhanceTarget.idx ? {...img,url:newUrl,preview:newUrl,enhanced:true} : img))
+            }
+            setEnhanceTarget(null)
+            toast('✨ Photo enhanced!')
+          }}
+          onClose={() => setEnhanceTarget(null)}
+          toast={toast}
+        />
+      )}
     </div>
   )
 }
@@ -1970,6 +2117,8 @@ function Products({ workspace, toast }) {
   const [selected, setSelected] = useState(new Set())
   const [showDotMenu, setShowDotMenu] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  // AI enhance
+  const [enhanceTarget, setEnhanceTarget] = useState(null) // {idx, url, preview}
 
   useEffect(()=>{if(workspace)fetchData()},[workspace])
   async function fetchData(){const{data}=await supabase.from('products').select('*').eq('workspace_id',workspace.id).order('created_at',{ascending:false});setData(data||[])}
@@ -2074,7 +2223,8 @@ function Products({ workspace, toast }) {
             </div>
             <div>
               <div style={{fontSize:'.75rem',fontWeight:600,color:'var(--ink-3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'.5rem'}}>Photos</div>
-              <ImageUploadZone pendingImgs={pendingImgs} onSelect={handleImageSelect} onRemove={i=>setPendingImgs(prev=>prev.filter((_,idx)=>idx!==i))} uploading={uploading}/>
+              <ImageUploadZone pendingImgs={pendingImgs} onSelect={handleImageSelect} onRemove={i=>setPendingImgs(prev=>prev.filter((_,idx)=>idx!==i))} uploading={uploading}
+                onEnhance={(i, url, preview) => setEnhanceTarget({idx:i, url, preview})}/>
             </div>
             <button type="submit" className="btn btn-primary" style={{justifyContent:'center',padding:'.75rem'}} disabled={saving||uploading}>
               {uploading?'Compressing & uploading…':saving?'Saving…':'Save product'}
@@ -2135,6 +2285,22 @@ function Products({ workspace, toast }) {
       {editProduct&&!selectMode&&(
         <ProductEditModal product={editProduct} workspaceId={workspace.id}
           onClose={()=>setEditProduct(null)} onSaved={fetchData} onDeleted={fetchData} toast={toast}/>
+      )}
+
+      {enhanceTarget && workspace && (
+        <EnhanceModal
+          imageUrl={enhanceTarget.url}
+          imagePreview={enhanceTarget.preview}
+          workspace={workspace}
+          onSelect={newUrl => {
+            setPendingImgs(prev => prev.map((img, i) =>
+              i === enhanceTarget.idx ? { ...img, url: newUrl, preview: newUrl, enhanced: true } : img
+            ))
+            toast('✨ Photo enhanced!')
+          }}
+          onClose={() => setEnhanceTarget(null)}
+          toast={toast}
+        />
       )}
     </div>
   )
