@@ -366,6 +366,18 @@ footer { background:#090907; padding:3rem; border-top:1px solid rgba(255,255,255
 .sf-cta-hint { margin-top:.85rem; font-size:.92rem; color:var(--ink-3); font-weight:300; }
 .sf-cta-hint strong { color:var(--ink); font-weight:500; }
 @media(max-width:600px){ .sf-section{padding:5rem 1.5rem;} }
+
+/* LILAS QUOTE — scroll-triggered gold highlight */
+.lilas-quote { transition: background .9s ease, border-color .9s ease, box-shadow .9s ease; }
+.lilas-quote p { transition: color .9s ease; }
+.lilas-quote .lilas-attr { transition: color .9s ease; }
+.lilas-quote[data-rv].in {
+  background: rgba(181,137,58,.07) !important;
+  border-color: rgba(181,137,58,.28) !important;
+  box-shadow: 0 0 60px rgba(181,137,58,.1), inset 0 0 40px rgba(181,137,58,.04);
+}
+.lilas-quote[data-rv].in p { color: rgba(255,255,255,.78) !important; }
+.lilas-quote[data-rv].in .lilas-attr { color: rgba(181,137,58,.55) !important; }
 `
 
 const plans = [
@@ -560,7 +572,7 @@ export default function Landing() {
       </div>
 
       {/* LILAS — BEFORE & AFTER */}
-      <div style={{background:'var(--ink)',padding:'8rem 3rem'}}>
+      <div style={{background:'linear-gradient(180deg, #2a2118 0%, #1a1410 12%, #0f0e0c 30%)',padding:'8rem 3rem'}}>
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
           <div data-rv style={{textAlign:'center',marginBottom:'5rem'}}>
             <div className="sec-tag center muted" style={{justifyContent:'center',marginBottom:'1.25rem'}}>
@@ -714,11 +726,11 @@ export default function Landing() {
             </div>
           </div>
 
-          <div data-rv style={{textAlign:'center',marginTop:'4rem',padding:'2.5rem',background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'16px',maxWidth:'620px',margin:'4rem auto 0'}}>
+          <div data-rv="fade" className="lilas-quote" style={{textAlign:'center',marginTop:'4rem',padding:'2.5rem',background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'16px',maxWidth:'620px',margin:'4rem auto 0'}}>
             <p style={{fontSize:'1rem',fontFamily:'Playfair Display,serif',fontStyle:'italic',color:'rgba(255,255,255,.5)',marginBottom:'.75rem',lineHeight:1.5}}>
               "This is the week thousands of service professionals are living right now. We built Organized to end it."
             </p>
-            <div style={{fontSize:'.75rem',color:'rgba(255,255,255,.2)',letterSpacing:'.04em'}}>— The Organized. team</div>
+            <div className="lilas-attr" style={{fontSize:'.75rem',color:'rgba(255,255,255,.2)',letterSpacing:'.04em'}}>— The Organized. team</div>
           </div>
         </div>
       </div>
