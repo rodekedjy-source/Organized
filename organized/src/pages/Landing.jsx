@@ -120,7 +120,7 @@ button:active { transform: scale(.97) !important; }
 .dm-more::before { content:''; display:block; width:16px; height:1px; background:rgba(255,255,255,.1); }
 
 /* PHONE SECTION */
-.phone-section { background:var(--cream); padding:8rem 3rem; }
+.phone-section { background:var(--cream); padding:10rem 4rem; }
 .phone-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:6rem; align-items:center; }
 .phone-h2 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,3.5vw,3.2rem); font-weight:700; color:var(--ink); line-height:1.1; margin-bottom:1rem; }
 .phone-h2 em { font-style:italic; font-weight:400; color:var(--gold); }
@@ -159,9 +159,9 @@ button:active { transform: scale(.97) !important; }
 .ip-powered { font-size:.42rem; color:var(--gold); opacity:.45; }
 
 /* BETA SECTION */
-.beta-section { background:var(--white); padding:8rem 3rem; }
+.beta-section { background:var(--white); padding:10rem 4rem; }
 .beta-inner { max-width:1100px; margin:0 auto; }
-.beta-top { text-align:center; margin-bottom:4rem; }
+.beta-top { text-align:center; margin-bottom:5rem; }
 .beta-h2 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,3.5vw,3rem); font-weight:700; color:var(--ink); line-height:1.1; margin-bottom:1rem; }
 .beta-h2 em { font-style:italic; font-weight:400; color:var(--gold); }
 .beta-sub { font-size:.95rem; color:var(--ink-3); font-weight:300; line-height:1.8; max-width:520px; margin:0 auto 3rem; }
@@ -183,9 +183,9 @@ button:active { transform: scale(.97) !important; }
 .beta-spots-text { font-size:.72rem; color:rgba(181,137,58,.8); letter-spacing:.04em; }
 
 /* HOW */
-.how-section { background:var(--cream); padding:8rem 3rem; }
+.how-section { background:var(--cream); padding:10rem 4rem; }
 .how-inner { max-width:1100px; margin:0 auto; }
-.how-top { text-align:center; margin-bottom:5rem; }
+.how-top { text-align:center; margin-bottom:6rem; }
 .how-h2 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,3.5vw,3rem); font-weight:700; color:var(--ink); line-height:1.1; }
 .how-h2 em { font-style:italic; font-weight:400; color:var(--gold); }
 .how-sub { font-size:.9rem; color:var(--ink-3); font-weight:300; line-height:1.8; max-width:420px; margin:.85rem auto 0; }
@@ -198,9 +198,9 @@ button:active { transform: scale(.97) !important; }
 .how-desc { font-size:.82rem; color:var(--ink-3); line-height:1.7; font-weight:300; }
 
 /* PRICING */
-.pricing-section { background:var(--white); padding:8rem 3rem; }
+.pricing-section { background:var(--white); padding:10rem 4rem; }
 .pricing-inner { max-width:1100px; margin:0 auto; }
-.pricing-top { text-align:center; margin-bottom:4rem; }
+.pricing-top { text-align:center; margin-bottom:5rem; }
 .pricing-h2 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,3.5vw,3rem); font-weight:700; color:var(--ink); line-height:1.1; }
 .pricing-h2 em { font-style:italic; font-weight:400; color:var(--gold); }
 .pricing-sub { font-size:.88rem; color:var(--ink-3); font-weight:300; margin-top:.75rem; }
@@ -238,7 +238,7 @@ button:active { transform: scale(.97) !important; }
 .plan.hot .plan-btn:hover { background:#9e7630; }
 
 /* FAQ */
-.faq-section { background:var(--cream); padding:8rem 3rem; }
+.faq-section { background:var(--cream); padding:10rem 4rem; }
 .faq-inner { max-width:780px; margin:0 auto; }
 .faq-top { text-align:center; margin-bottom:4rem; }
 .faq-h2 { font-family:'Playfair Display',serif; font-size:clamp(2rem,3.5vw,2.75rem); font-weight:700; color:var(--ink); line-height:1.1; }
@@ -323,49 +323,35 @@ footer { background:#090907; padding:3rem; border-top:1px solid rgba(255,255,255
   0%,80%,100% { transform:scale(.6); opacity:.4; }
   40%          { transform:scale(1);  opacity:1;  }
 }
-.sf-section { background:linear-gradient(175deg, #0f0e0c 0%, #1c1810 4%, #2a2218 8%, #F5EDD8 16%, #FAF6EC 50%, #F5EDD8 84%, #FAF6EC 100%); padding:8rem 3rem; overflow:hidden; position:relative; }
+.sf-section { background:linear-gradient(175deg, #0f0e0c 0%, #1c1810 4%, #2a2218 8%, #F5EDD8 16%, #FAF6EC 50%, #F5EDD8 84%, #FAF6EC 100%); padding:10rem 4rem; overflow:hidden; position:relative; }
 .sf-section::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 50% at 50% 30%, rgba(181,137,58,.07) 0%, transparent 70%); pointer-events:none; }
-.sf-inner { max-width:900px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:4.5rem; position:relative; }
-.sf-blob-1 { position:absolute; top:-100px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(181,137,58,.13) 0%,transparent 65%); pointer-events:none; }
-.sf-blob-2 { position:absolute; bottom:-80px; left:-80px; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(181,137,58,.09) 0%,transparent 65%); pointer-events:none; }
-.sf-gold-line { display:flex; align-items:center; gap:.75rem; justify-content:center; margin-bottom:1.5rem; }
-.sf-gold-line::before,.sf-gold-line::after { content:''; flex:1; max-width:60px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
-.sf-heading { text-align:center; z-index:1; }
-.sf-h2 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,4vw,3.5rem); font-weight:700; color:var(--ink); line-height:1.1; margin-bottom:.85rem; }
-.sf-h2 em { font-style:italic; font-weight:400; color:var(--gold); }
-.sf-sub { font-size:.95rem; color:var(--ink-3); font-weight:300; line-height:1.8; max-width:440px; margin:0 auto; }
-.sf-phone-wrap { width:252px; height:518px; border-radius:52px; background:linear-gradient(145deg,#3d3d3f 0%,#1c1c1e 40%,#2c2c2e 100%); padding:10px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 2px 0 0 #4a4a4c,18px 24px 48px rgba(0,0,0,.32),36px 48px 90px rgba(0,0,0,.2),60px 80px 130px rgba(0,0,0,.1); position:relative; z-index:1; transition:transform .3s ease; }
-.sf-phone-wrap.floating { animation:sfPhoneFloat 5s ease-in-out infinite; }
-.sf-btn-r  { position:absolute; right:-3px; top:130px; width:3px; height:64px; background:#3a3a3c; border-radius:0 2px 2px 0; }
-.sf-btn-l1 { position:absolute; left:-3px;  top:108px; width:3px; height:36px; background:#3a3a3c; border-radius:2px 0 0 2px; }
-.sf-btn-l2 { position:absolute; left:-3px;  top:158px; width:3px; height:60px; background:#3a3a3c; border-radius:2px 0 0 2px; }
-.sf-screen { width:100%; height:100%; border-radius:44px; background:#f2f2f7; overflow:hidden; display:flex; flex-direction:column; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); }
-.sf-island { width:96px; height:26px; background:#000; border-radius:20px; margin:12px auto 0; flex-shrink:0; box-shadow:0 0 14px rgba(0,0,0,.7); }
-.sf-chat-hdr { background:#fff; padding:10px 14px; display:flex; align-items:center; gap:9px; border-bottom:1px solid rgba(0,0,0,.06); margin-top:8px; flex-shrink:0; }
-.sf-av { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }
-.sf-chat-name  { font-size:11px; font-weight:700; color:#1a1a1a; line-height:1.2; }
-.sf-chat-label { font-size:9px; color:#8e8e93; margin-top:1px; }
-.sf-feed { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px; scrollbar-width:none; }
-.sf-feed::-webkit-scrollbar { display:none; }
-.sf-bubble { padding:7px 11px; font-size:10.5px; max-width:82%; line-height:1.45; font-weight:500; word-break:break-word; animation:sfMsgPop .38s cubic-bezier(.34,1.56,.64,1) both; }
-.sf-bubble.client { background:#e5e5ea; color:#1a1a1a; border-radius:16px 16px 16px 5px; align-self:flex-start; }
-.sf-bubble.pro    { background:var(--gold); color:#fff; border-radius:16px 16px 5px 16px; align-self:flex-end; box-shadow:0 2px 10px rgba(181,137,58,.4); }
-.sf-typing        { display:flex; padding:9px 14px; border-radius:16px; width:fit-content; gap:4px; }
-.sf-typing.client { background:#e5e5ea; align-self:flex-start; }
-.sf-typing.pro    { background:var(--gold); align-self:flex-end; }
-.sf-dot           { width:5px; height:5px; border-radius:50%; }
-.sf-dot.client    { background:#666; }
-.sf-dot.pro       { background:rgba(255,255,255,.85); }
-.sf-dot:nth-child(1) { animation:sfDot 1.2s .0s infinite ease-in-out; }
-.sf-dot:nth-child(2) { animation:sfDot 1.2s .2s infinite ease-in-out; }
-.sf-dot:nth-child(3) { animation:sfDot 1.2s .4s infinite ease-in-out; }
-.sf-chat-input  { background:#fff; border-top:1px solid rgba(0,0,0,.06); padding:8px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
-.sf-input-field { flex:1; background:#f2f2f7; border-radius:20px; padding:6px 12px; font-size:10px; color:#8e8e93; font-family:'DM Sans',sans-serif; }
-.sf-punchline { text-align:center; z-index:1; }
-.sf-quote    { font-family:'Playfair Display',serif; font-size:clamp(1.2rem,2.5vw,1.65rem); font-style:italic; color:var(--ink-2); line-height:1.45; }
-.sf-cta-hint { margin-top:.85rem; font-size:.92rem; color:var(--ink-3); font-weight:300; }
-.sf-cta-hint strong { color:var(--ink); font-weight:500; }
-@media(max-width:600px){ .sf-section{padding:5rem 1.5rem;} }
+@media(max-width:600px){ .sf-section{padding:6rem 1.5rem;} }
+
+/* ─── DASHBOARD PHONE MOCKUP ─── */
+@keyframes dashPhoneFloat {
+  0%,100% { transform:perspective(1000px) rotateY(-8deg) rotateX(4deg) translateY(0px); }
+  50%      { transform:perspective(1000px) rotateY(-8deg) rotateX(4deg) translateY(-12px); }
+}
+@keyframes dashScroll {
+  0%,8%    { transform:translateY(0); }
+  33%,43%  { transform:translateY(-155px); }
+  68%,78%  { transform:translateY(-310px); }
+  95%,100% { transform:translateY(0); }
+}
+@keyframes chipFloat1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+@keyframes chipFloat2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.dash-phone-wrap { animation:dashPhoneFloat 6s ease-in-out infinite; width:238px; height:500px; border-radius:48px; background:linear-gradient(145deg,#3d3d3f 0%,#1c1c1e 40%,#2c2c2e 100%); padding:9px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 2px 0 0 #4a4a4c,-14px 20px 48px rgba(0,0,0,.28),-28px 40px 80px rgba(0,0,0,.18); position:relative; z-index:2; flex-shrink:0; }
+.dash-btn-r  { position:absolute; right:-3px; top:130px; width:3px; height:64px; background:#3a3a3c; border-radius:0 2px 2px 0; }
+.dash-btn-l1 { position:absolute; left:-3px; top:108px; width:3px; height:36px; background:#3a3a3c; border-radius:2px 0 0 2px; }
+.dash-btn-l2 { position:absolute; left:-3px; top:158px; width:3px; height:60px; background:#3a3a3c; border-radius:2px 0 0 2px; }
+.dash-screen { width:100%; height:100%; border-radius:41px; background:#f5f4f0; overflow:hidden; display:flex; flex-direction:column; }
+.dash-island { width:90px; height:24px; background:#000; border-radius:18px; margin:11px auto 0; flex-shrink:0; box-shadow:0 0 12px rgba(0,0,0,.7); }
+.dash-scrollable-wrap { flex:1; overflow:hidden; }
+.dash-scrollable { animation:dashScroll 14s ease-in-out infinite; }
+.dash-chip { background:#fff; border:1px solid var(--border); border-radius:16px; padding:.85rem 1.1rem; box-shadow:0 10px 36px rgba(0,0,0,.09); position:absolute; min-width:148px; z-index:3; }
+.dash-chip-dark { background:var(--ink); border-color:transparent; box-shadow:0 10px 36px rgba(0,0,0,.25); }
+.dash-chip-gold { border-color:rgba(181,137,58,.25); box-shadow:0 10px 36px rgba(181,137,58,.14); }
+@media(max-width:900px){ .dash-chip{display:none;} }
 
 /* LILAS QUOTE — scroll-triggered gold highlight */
 .lilas-quote { transition: background .9s ease, border-color .9s ease, box-shadow .9s ease; }
@@ -587,7 +573,7 @@ export default function Landing() {
       </div>
 
       {/* LILAS — BEFORE & AFTER */}
-      <div style={{background:'linear-gradient(180deg, #2a2118 0%, #1a1410 12%, #0f0e0c 30%)',padding:'8rem 3rem'}}>
+      <div style={{background:'linear-gradient(180deg, #2a2118 0%, #1a1410 12%, #0f0e0c 30%)',padding:'10rem 4rem'}}>
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
           <div data-rv style={{textAlign:'center',marginBottom:'5rem'}}>
             <div className="sec-tag center muted" style={{justifyContent:'center',marginBottom:'1.25rem'}}>
@@ -808,72 +794,157 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* DASHBOARD DEMO */}
-      <div style={{background:'var(--cream)',padding:'8rem 3rem'}}>
+      {/* DASHBOARD DEMO — 3D PHONE */}
+      <div style={{background:'var(--cream)',padding:'10rem 4rem',overflow:'hidden',position:'relative'}}>
+        <div style={{position:'absolute',top:'10%',left:'50%',transform:'translateX(-50%)',width:'700px',height:'500px',background:'radial-gradient(ellipse, rgba(181,137,58,.06) 0%, transparent 70%)',pointerEvents:'none'}}/>
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
-          <div data-rv style={{textAlign:'center',marginBottom:'4rem'}}>
-            <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
+          <div data-rv style={{textAlign:'center',marginBottom:'5.5rem',position:'relative',zIndex:1}}>
+            <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1.25rem'}}>
               <div className="sec-tag-line"/><span className="sec-tag-text">Your dashboard</span><div className="sec-tag-line"/>
             </div>
-            <h2 style={{fontFamily:'Playfair Display,serif',fontSize:'clamp(2.2rem,3.5vw,3rem)',fontWeight:700,color:'var(--ink)',lineHeight:1.1}}>
-              Everything at a glance. <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>Nothing missed.</em>
+            <h2 style={{fontFamily:'Playfair Display,serif',fontSize:'clamp(2.2rem,3.5vw,3rem)',fontWeight:700,color:'var(--ink)',lineHeight:1.1,marginBottom:'1rem'}}>
+              Your business. <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>At a glance.</em>
             </h2>
-            <p style={{fontSize:'.9rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.8,maxWidth:'440px',margin:'.85rem auto 0'}}>Your business, live and in real time. Every booking, every sale, every client — organized the moment it happens.</p>
+            <p style={{fontSize:'.95rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.85,maxWidth:'460px',margin:'0 auto'}}>Every booking, every sale, every client — organized the moment it happens. No spreadsheets. No missed DMs. No confusion.</p>
           </div>
-          <div data-rv="scale" style={{background:'#1a1815',border:'1px solid rgba(255,255,255,.08)',borderRadius:'16px',overflow:'hidden',boxShadow:'0 48px 100px rgba(0,0,0,.25)'}}>
-            <div style={{background:'#111',height:'38px',display:'flex',alignItems:'center',padding:'0 1rem',gap:'.4rem',borderBottom:'1px solid rgba(255,255,255,.06)'}}>
-              {['#ff5f57','#febc2e','#28c840'].map((c,i)=><div key={i} style={{width:9,height:9,borderRadius:'50%',background:c}}/>)}
-              <div style={{flex:1,background:'rgba(255,255,255,.05)',borderRadius:'4px',height:'20px',margin:'0 .75rem',display:'flex',alignItems:'center',padding:'0 .6rem'}}>
-                <span style={{fontSize:'.58rem',color:'rgba(255,255,255,.2)',fontFamily:'monospace'}}>organized-two.vercel.app/dashboard</span>
-              </div>
+
+          {/* Phone + floating chips */}
+          <div data-rv="scale" style={{position:'relative',display:'flex',justifyContent:'center',alignItems:'center',minHeight:'620px'}}>
+
+            {/* Chip TL — Revenue */}
+            <div className="dash-chip" style={{left:'5%',top:'6%',animation:'chipFloat1 4.5s ease-in-out infinite'}}>
+              <div style={{fontSize:'.58rem',color:'var(--ink-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>Revenue · April</div>
+              <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.45rem',fontWeight:700,color:'var(--ink)',lineHeight:1}}>$2,840</div>
+              <div style={{fontSize:'.65rem',color:'#4ade80',marginTop:'.3rem',fontWeight:500}}>↑ 34% vs last month</div>
             </div>
-            <div style={{display:'flex',height:'320px'}}>
-              <div style={{width:'150px',background:'#111',borderRight:'1px solid rgba(255,255,255,.05)',padding:'.85rem 0',flexShrink:0}}>
-                <div style={{padding:'.4rem .85rem',marginBottom:'.25rem'}}>
-                  <div style={{fontSize:'.52rem',color:'rgba(255,255,255,.2)',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:'.5rem'}}>Workspace</div>
-                  {['Overview','Services','Appointments','Products','Formations','Clients'].map((item,i)=>(
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:'.4rem',padding:'.38rem .5rem',borderRadius:'5px',marginBottom:'.15rem',background:i===0?'rgba(181,137,58,.08)':'transparent',borderLeft:i===0?'2px solid var(--gold)':'2px solid transparent',fontSize:'.58rem',color:i===0?'var(--gold)':'rgba(255,255,255,.28)'}}>
-                      <div style={{width:4,height:4,borderRadius:'50%',background:'currentColor',opacity:.6,flexShrink:0}}/>
-                      {item}
-                      {item==='Appointments'&&<span style={{marginLeft:'auto',background:'rgba(181,137,58,.2)',color:'var(--gold)',fontSize:'.45rem',padding:'1px 4px',borderRadius:'6px'}}>3</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{flex:1,padding:'1.1rem',display:'flex',flexDirection:'column',gap:'.75rem',overflow:'hidden'}}>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'.5rem'}}>
-                  {[['TOTAL REVENUE','$3,240','↑ 18%'],['APPOINTMENTS','28','5 pending'],['PRODUCTS SOLD','31','7 this week'],['STUDENTS','74','12 new']].map(([l,v,d],i)=>(
-                    <div key={i} style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'8px',padding:'.6rem .75rem'}}>
-                      <div style={{fontSize:'.44rem',color:'rgba(255,255,255,.25)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'.25rem'}}>{l}</div>
-                      <div style={{fontFamily:'Playfair Display,serif',fontSize:'1rem',color:'#fff',marginBottom:'.15rem'}}>{v}</div>
-                      <div style={{fontSize:'.44rem',color:i===1?'#fbbf24':'#4ade80'}}>{d}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:'.5rem',flex:1}}>
-                  <div style={{background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'8px',overflow:'hidden'}}>
-                    <div style={{padding:'.5rem .75rem',borderBottom:'1px solid rgba(255,255,255,.05)',fontSize:'.52rem',fontWeight:600,color:'rgba(255,255,255,.4)'}}>Today's schedule</div>
-                    {[['Amara D.','Box Braids','10:00','$180','confirmed'],['Zoe M.','Silk Press','13:00','$95','confirmed'],['Kezia B.','Color & Cut','15:30','$220','pending'],['Nadia L.','Loc Retwist','17:00','$120','confirmed']].map(([c,s,t,a,st],i)=>(
-                      <div key={i} style={{display:'flex',alignItems:'center',gap:'.4rem',padding:'.38rem .75rem',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-                        <span style={{fontSize:'.5rem',color:'rgba(255,255,255,.6)',fontWeight:500,flex:1}}>{c}</span>
-                        <span style={{fontSize:'.48rem',color:'rgba(255,255,255,.3)',flex:1}}>{s}</span>
-                        <span style={{fontSize:'.48rem',color:'rgba(255,255,255,.3)',width:30}}>{t}</span>
-                        <span style={{fontSize:'.5rem',color:'var(--gold)',fontWeight:600,width:28}}>{a}</span>
-                        <span style={{fontSize:'.44rem',padding:'1px 5px',borderRadius:'8px',background:st==='confirmed'?'rgba(46,125,82,.2)':'rgba(202,138,4,.15)',color:st==='confirmed'?'#4ade80':'#fbbf24'}}>{st}</span>
-                      </div>
-                    ))}
+
+            {/* Chip TR — No-shows */}
+            <div className="dash-chip dash-chip-dark" style={{right:'5%',top:'18%',animation:'chipFloat2 5.5s ease-in-out infinite'}}>
+              <div style={{fontSize:'.58rem',color:'rgba(255,255,255,.4)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>No-shows</div>
+              <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.45rem',fontWeight:700,color:'#4ade80',lineHeight:1}}>0</div>
+              <div style={{fontSize:'.65rem',color:'rgba(255,255,255,.35)',marginTop:'.3rem'}}>Reminders sent · 18/18</div>
+            </div>
+
+            {/* Chip BL — Top service */}
+            <div className="dash-chip dash-chip-gold" style={{left:'4%',bottom:'14%',animation:'chipFloat1 5s ease-in-out 1s infinite'}}>
+              <div style={{fontSize:'.58rem',color:'var(--gold)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>Top service</div>
+              <div style={{fontSize:'.85rem',fontWeight:600,color:'var(--ink)',marginBottom:'.15rem'}}>Silk Press</div>
+              <div style={{fontSize:'.65rem',color:'var(--ink-3)'}}>18 bookings · $1,710</div>
+            </div>
+
+            {/* Chip BR — Appointments */}
+            <div className="dash-chip" style={{right:'4%',bottom:'20%',animation:'chipFloat2 4s ease-in-out 2s infinite'}}>
+              <div style={{fontSize:'.58rem',color:'var(--ink-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>Confirmed</div>
+              <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.45rem',fontWeight:700,color:'var(--ink)',lineHeight:1}}>18</div>
+              <div style={{fontSize:'.65rem',color:'var(--ink-3)',marginTop:'.3rem'}}>appointments this month</div>
+            </div>
+
+            {/* 3D Phone */}
+            <div className="dash-phone-wrap">
+              <div className="dash-btn-r"/><div className="dash-btn-l1"/><div className="dash-btn-l2"/>
+              <div className="dash-screen">
+                <div className="dash-island"/>
+                {/* Top bar */}
+                <div style={{background:'#f5f4f0',padding:'.5rem .7rem',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0,borderBottom:'1px solid rgba(0,0,0,.05)'}}>
+                  <span style={{fontSize:'13px',color:'var(--ink-3)',lineHeight:1}}>☰</span>
+                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'.78rem',fontWeight:500,color:'var(--ink)'}}>Organized<span style={{color:'var(--gold)'}}>.</span></div>
+                  <div style={{display:'flex',gap:'3px',background:'rgba(0,0,0,.07)',borderRadius:'8px',padding:'2px'}}>
+                    <div style={{fontSize:'.42rem',fontWeight:600,color:'var(--ink)',background:'#fff',borderRadius:'6px',padding:'2px 7px',boxShadow:'0 1px 3px rgba(0,0,0,.1)'}}>Dash</div>
+                    <div style={{fontSize:'.42rem',color:'var(--ink-3)',padding:'2px 7px'}}>Client</div>
                   </div>
-                  <div style={{background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'8px',padding:'.6rem .75rem'}}>
-                    <div style={{fontSize:'.52rem',fontWeight:600,color:'rgba(255,255,255,.4)',marginBottom:'.5rem'}}>Revenue — this week</div>
-                    <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.25rem',color:'#fff',marginBottom:'.15rem'}}>$3,620</div>
-                    <div style={{fontSize:'.44rem',color:'#4ade80',marginBottom:'.75rem'}}>↑ 23% vs last week</div>
-                    <div style={{display:'flex',alignItems:'flex-end',gap:'3px',height:'60px'}}>
-                      {[320,480,210,560,740,890,420].map((v,i)=>(
-                        <div key={i} style={{flex:1,borderRadius:'2px 2px 0 0',background:v===890?'var(--gold)':'rgba(181,137,58,.25)',height:`${(v/950)*100}%`}}/>
+                </div>
+                {/* Scrollable content */}
+                <div className="dash-scrollable-wrap">
+                  <div className="dash-scrollable">
+                    {/* Greeting */}
+                    <div style={{padding:'.9rem .8rem .5rem'}}>
+                      <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.15rem',fontWeight:700,color:'var(--ink)',lineHeight:1.15}}>Good morning, Nadia.</div>
+                      <div style={{fontSize:'.55rem',color:'var(--ink-3)',marginTop:'.2rem'}}>Monday · April 20, 2026</div>
+                    </div>
+                    {/* Quick actions */}
+                    <div style={{padding:'0 .8rem .7rem',display:'flex',gap:'.4rem'}}>
+                      <div style={{fontSize:'.5rem',fontWeight:500,color:'var(--ink)',border:'1px solid var(--border)',borderRadius:'8px',padding:'.3rem .55rem',background:'#fff',display:'flex',alignItems:'center',gap:'.25rem'}}>🔗 Copy link</div>
+                      <div style={{fontSize:'.5rem',fontWeight:600,color:'#fff',background:'var(--ink)',borderRadius:'8px',padding:'.3rem .65rem'}}>New appointment</div>
+                    </div>
+                    {/* Coach */}
+                    <div style={{margin:'0 .8rem .55rem',background:'#fff',borderRadius:'10px',padding:'.6rem .7rem',border:'1px solid var(--border)'}}>
+                      <div style={{fontSize:'.46rem',fontWeight:700,letterSpacing:'.1em',color:'var(--gold)',marginBottom:'.3rem'}}>COACH</div>
+                      <div style={{fontSize:'.54rem',color:'var(--ink-2)',lineHeight:1.6}}>3 confirmed bookings today. Amara hasn't left a review yet — great moment to ask.</div>
+                    </div>
+                    {/* Stats */}
+                    <div style={{padding:'0 .8rem',display:'flex',gap:'.35rem',marginBottom:'.55rem'}}>
+                      {[['REVENUE','$2,840','↑ 34%','#4ade80'],['APPTS','18','2 pending','#fbbf24'],['PRODUCTS','7','this week','rgba(181,137,58,.8)']].map(([l,v,d,dc],i)=>(
+                        <div key={i} style={{flex:'1 0 0',background:'#fff',borderRadius:'9px',padding:'.5rem .45rem',border:'1px solid var(--border)',minWidth:0}}>
+                          <div style={{fontSize:'.38rem',color:'var(--ink-3)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'.22rem',fontWeight:500,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{l}</div>
+                          <div style={{fontFamily:'Playfair Display,serif',fontSize:'.85rem',color:'var(--ink)',fontWeight:700,lineHeight:1}}>{v}</div>
+                          <div style={{fontSize:'.38rem',color:dc,marginTop:'.18rem',fontWeight:500}}>{d}</div>
+                        </div>
                       ))}
                     </div>
-                    <div style={{display:'flex',gap:'3px',marginTop:'.3rem'}}>
-                      {['S','M','T','W','T','F','S'].map(d=><div key={d} style={{flex:1,fontSize:'.42rem',color:'rgba(255,255,255,.2)',textAlign:'center'}}>{d}</div>)}
+                    {/* Revenue chart */}
+                    <div style={{margin:'0 .8rem .55rem',background:'#fff',borderRadius:'10px',padding:'.6rem .7rem',border:'1px solid var(--border)'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.45rem'}}>
+                        <div style={{fontSize:'.55rem',fontWeight:600,color:'var(--ink)'}}>Revenue — this week</div>
+                        <div style={{fontSize:'.44rem',color:'#4ade80',background:'rgba(74,222,128,.1)',padding:'.12rem .38rem',borderRadius:'7px',fontWeight:500}}>↑ 12%</div>
+                      </div>
+                      <div style={{display:'flex',alignItems:'flex-end',gap:'3px',height:'38px',marginBottom:'.25rem'}}>
+                        {[18,80,42,115,88,55,170].map((v,i)=>(
+                          <div key={i} style={{flex:1,borderRadius:'2px 2px 0 0',background:i===6?'var(--gold)':'rgba(181,137,58,.2)',height:`${(v/190)*100}%`}}/>
+                        ))}
+                      </div>
+                      <div style={{display:'flex',gap:'3px'}}>
+                        {['S','M','T','W','T','F','S'].map((d,i)=><div key={i} style={{flex:1,fontSize:'.36rem',color:i===6?'var(--gold)':'var(--ink-3)',textAlign:'center',fontWeight:i===6?700:400}}>{d}</div>)}
+                      </div>
+                    </div>
+                    {/* Revenue goal */}
+                    <div style={{margin:'0 .8rem .55rem',background:'#fff',borderRadius:'10px',padding:'.6rem .7rem',border:'1px solid var(--border)'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.4rem'}}>
+                        <div style={{fontSize:'.55rem',fontWeight:600,color:'var(--ink)'}}>Revenue Goal — April</div>
+                        <div style={{fontSize:'.44rem',color:'var(--ink-3)'}}>Edit goal</div>
+                      </div>
+                      <div style={{fontSize:'.48rem',color:'var(--ink-3)',marginBottom:'.38rem'}}>$2,840 of $4,000</div>
+                      <div style={{height:'5px',background:'var(--border)',borderRadius:'3px',overflow:'hidden',marginBottom:'.28rem'}}>
+                        <div style={{width:'71%',height:'100%',background:'linear-gradient(90deg,var(--gold),#d4a853)',borderRadius:'3px'}}/>
+                      </div>
+                      <div style={{display:'flex',justifyContent:'space-between'}}>
+                        <div style={{fontSize:'.44rem',color:'var(--gold)',fontWeight:600}}>71% reached</div>
+                        <div style={{fontSize:'.44rem',color:'var(--ink-3)'}}>$1,160 remaining</div>
+                      </div>
+                    </div>
+                    {/* Top service */}
+                    <div style={{margin:'0 .8rem .55rem',background:'#fff',borderRadius:'10px',padding:'.6rem .7rem',border:'1px solid var(--border)'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.4rem'}}>
+                        <div style={{fontSize:'.55rem',fontWeight:600,color:'var(--ink)'}}>Your top service</div>
+                        <div style={{fontSize:'.44rem',color:'var(--gold)',background:'rgba(181,137,58,.1)',padding:'.12rem .38rem',borderRadius:'7px',fontWeight:600}}>#1</div>
+                      </div>
+                      <div style={{fontFamily:'Playfair Display,serif',fontSize:'.95rem',fontWeight:700,color:'var(--ink)',marginBottom:'.12rem'}}>Silk Press</div>
+                      <div style={{fontSize:'.48rem',color:'var(--ink-3)',marginBottom:'.38rem'}}>18 bookings · $1,710 earned</div>
+                      <div style={{height:'4px',background:'var(--border)',borderRadius:'2px',overflow:'hidden',marginBottom:'.25rem'}}>
+                        <div style={{width:'61%',height:'100%',background:'var(--gold)',borderRadius:'2px'}}/>
+                      </div>
+                      <div style={{fontSize:'.44rem',color:'var(--gold)',fontWeight:500}}>61% of your total revenue</div>
+                    </div>
+                    {/* Today's schedule */}
+                    <div style={{margin:'0 .8rem 1rem',background:'#fff',borderRadius:'10px',padding:'.6rem .7rem',border:'1px solid var(--border)'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.5rem'}}>
+                        <div style={{fontSize:'.55rem',fontWeight:600,color:'var(--ink)'}}>Today's schedule</div>
+                        <div style={{fontSize:'.44rem',color:'#4ade80',background:'rgba(74,222,128,.1)',padding:'.12rem .42rem',borderRadius:'7px',display:'flex',alignItems:'center',gap:'.2rem'}}>
+                          <div style={{width:4,height:4,borderRadius:'50%',background:'#4ade80'}}/>3 confirmed
+                        </div>
+                      </div>
+                      {[['A','Amara D.','Box Braids','10:00 AM','$180','#8b5cf6'],['K','Kezia B.','Silk Press','1:00 PM','$95','#ec4899'],['Z','Zoe M.','Loc Retwist','4:30 PM','$120','#f97316']].map(([av,name,svc,time,price,col],i)=>(
+                        <div key={i} style={{display:'flex',alignItems:'center',gap:'.45rem',padding:'.35rem 0',borderTop:i>0?'1px solid var(--border)':'none'}}>
+                          <div style={{width:24,height:24,borderRadius:'50%',background:col,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.52rem',fontWeight:700,color:'#fff',flexShrink:0}}>{av}</div>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:'.52rem',fontWeight:600,color:'var(--ink)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{name}</div>
+                            <div style={{fontSize:'.46rem',color:'var(--ink-3)'}}>{svc}</div>
+                          </div>
+                          <div style={{textAlign:'right',flexShrink:0}}>
+                            <div style={{fontSize:'.46rem',color:'var(--ink-3)'}}>{time}</div>
+                            <div style={{fontSize:'.48rem',fontWeight:600,color:'var(--gold)'}}>{price}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -884,7 +955,7 @@ export default function Landing() {
       </div>
 
       {/* BOOKING FLOW */}
-      <div style={{background:'var(--white)',padding:'8rem 3rem'}}>
+      <div style={{background:'var(--white)',padding:'10rem 4rem'}}>
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
           <div data-rv style={{textAlign:'center',marginBottom:'4.5rem'}}>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
