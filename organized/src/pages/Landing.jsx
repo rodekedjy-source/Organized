@@ -67,18 +67,11 @@ button:active { transform: scale(.97) !important; }
 .nav.scrolled .nav-signin:hover { color:var(--ink); }
 .nav-cta { background:var(--gold); color:#fff; border:none; border-radius:7px; padding:.52rem 1.35rem; font-size:.78rem; font-weight:500; cursor:pointer; font-family:inherit; }
 .nav-cta:hover { background:#9e7630; transform:translateY(-1px) !important; box-shadow:0 6px 20px rgba(181,137,58,.3); }
-.lang-toggle { display:flex; align-items:center; border:1px solid rgba(255,255,255,.18); border-radius:6px; overflow:hidden; }
-.nav.scrolled .lang-toggle { border-color:var(--border); }
-.lang-btn { font-size:.7rem; padding:.28rem .55rem; cursor:pointer; background:transparent; color:rgba(255,255,255,.38); border:none; font-family:inherit; font-weight:600; letter-spacing:.04em; transition:all .18s; line-height:1; }
-.lang-btn.active { background:rgba(255,255,255,.14); color:#fff; }
-.nav.scrolled .lang-btn { color:var(--ink-3); }
-.nav.scrolled .lang-btn.active { background:var(--ink); color:#fff; }
-.lang-toggle { display:flex; align-items:center; gap:2px; background:rgba(255,255,255,.1); border-radius:20px; padding:3px; margin-left:.25rem; }
-.nav.scrolled .lang-toggle { background:rgba(0,0,0,.07); }
-.lang-btn { background:transparent; color:rgba(255,255,255,.4); border:none; border-radius:14px; padding:3px 10px; font-size:.62rem; font-weight:500; cursor:pointer; font-family:inherit; letter-spacing:.06em; text-transform:uppercase; transition:all .2s; }
-.lang-btn.active { background:rgba(255,255,255,.15); color:#fff; font-weight:700; }
-.nav.scrolled .lang-btn { color:var(--ink-3); }
-.nav.scrolled .lang-btn.active { background:rgba(181,137,58,.12); color:var(--gold); font-weight:700; }
+.lang-float { position:fixed; bottom:1.75rem; right:1.5rem; z-index:999; display:flex; align-items:center; background:rgba(12,11,9,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.1); border-radius:100px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.22); transition:opacity .3s, transform .3s; }
+.lang-float:hover { opacity:1 !important; }
+.lang-btn { font-size:.65rem; padding:.38rem .7rem; cursor:pointer; background:transparent; color:rgba(255,255,255,.38); border:none; font-family:inherit; font-weight:700; letter-spacing:.08em; transition:color .2s, background .2s; line-height:1; }
+.lang-btn.active { color:var(--gold); }
+.lang-sep { width:1px; height:11px; background:rgba(255,255,255,.12); flex-shrink:0; }
 
 /* HERO */
 .hero { min-height:100vh; background:var(--ink); position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9rem 3rem 7rem; text-align:center; }
@@ -722,11 +715,6 @@ export default function Landing() {
           <span className="nav-link" onClick={()=>document.getElementById('faq')?.scrollIntoView({behavior:'smooth'})}>{t.nav_faq}</span>
         </div>
         <div className="nav-right">
-          <div className="lang-toggle">
-            {['EN','FR'].map(l=>(
-              <button key={l} className={`lang-btn${lang===l.toLowerCase()?' active':''}`} onClick={()=>setLang(l.toLowerCase())}>{l}</button>
-            ))}
-          </div>
           <span className="nav-signin" onClick={()=>navigate('/auth')}>{t.nav_signin}</span>
           <button className="nav-cta" onClick={()=>navigate('/auth')}>{t.nav_cta}</button>
         </div>
@@ -991,16 +979,11 @@ export default function Landing() {
       <div className="phone-section">
         <div className="phone-inner">
           <div className="phone-text" data-rv="left">
-            <div className="sec-tag"><div className="sec-tag-line"/><span className="sec-tag-text">Your public profile</span></div>
-            <h2 className="phone-h2">One link.<br/><em>Everything they need.</em></h2>
-            <p className="phone-desc">Drop it in your bio. Your clients book appointments, shop your products, and enroll in your courses — <strong style={{color:'var(--ink)',fontWeight:400}}>without ever DMing you.</strong> You focus on the craft. <span translate="no">Organized</span> handles everything else.</p>
+            <div className="sec-tag"><div className="sec-tag-line"/><span className="sec-tag-text">{t.phone_tag}</span></div>
+            <h2 className="phone-h2">{t.phone_h2_s}<br/><em>{t.phone_h2_em}</em></h2>
+            <p className="phone-desc">{t.phone_desc}</p>
             <div className="phone-points">
-              {[
-                {icon:'📅',title:'Appointments booked 24/7',desc:'Real-time availability. Automated confirmations. Zero back-and-forth.'},
-                {icon:'🛍️',title:'Products sold directly',desc:'Your shop lives on your profile. Clients discover and order instantly.'},
-                {icon:'🎓',title:'Formations & courses',desc:'Monetize your expertise. Sell knowledge alongside your services.'},
-                {icon:'👥',title:'Clients tracked automatically',desc:'Every visit, every dollar, every relationship — organized for you.'},
-              ].map((p,i)=>(
+              {t.phone_pts.map((p,i)=>(
                 <div key={i} className="phone-point" data-rv data-delay={i*80}>
                   <div className="phone-point-icon">{p.icon}</div>
                   <div className="phone-point-text">
@@ -1051,12 +1034,12 @@ export default function Landing() {
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
           <div data-rv style={{textAlign:'center',marginBottom:'5.5rem',position:'relative',zIndex:1}}>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1.25rem'}}>
-              <div className="sec-tag-line"/><span className="sec-tag-text">Your dashboard</span><div className="sec-tag-line"/>
+              <div className="sec-tag-line"/><span className="sec-tag-text">{t.dash_tag}</span><div className="sec-tag-line"/>
             </div>
             <h2 style={{fontFamily:'Playfair Display,serif',fontSize:'clamp(2.2rem,3.5vw,3rem)',fontWeight:700,color:'var(--ink)',lineHeight:1.1,marginBottom:'1rem'}}>
-              Your business. <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>At a glance.</em>
+              {t.dash_h2_s} <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>{t.dash_h2_em}</em>
             </h2>
-            <p style={{fontSize:'.95rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.85,maxWidth:'460px',margin:'0 auto'}}>Every booking, every sale, every client — organized the moment it happens. No spreadsheets. No missed DMs. No confusion.</p>
+            <p style={{fontSize:'.95rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.85,maxWidth:'460px',margin:'0 auto'}}>{t.dash_sub}</p>
           </div>
 
           {/* Phone + floating chips */}
@@ -1064,30 +1047,30 @@ export default function Landing() {
 
             {/* Chip TL — Revenue */}
             <div className="dash-chip" style={{left:'5%',top:'6%',animation:'chipFloat1 4.5s ease-in-out infinite'}}>
-              <div style={{fontSize:'.58rem',color:'var(--ink-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>Revenue · April</div>
+              <div style={{fontSize:'.58rem',color:'var(--ink-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>{t.dash_chip_revenue}</div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.45rem',fontWeight:700,color:'var(--ink)',lineHeight:1}}>$2,840</div>
-              <div style={{fontSize:'.65rem',color:'#4ade80',marginTop:'.3rem',fontWeight:500}}>↑ 34% vs last month</div>
+              <div style={{fontSize:'.65rem',color:'#4ade80',marginTop:'.3rem',fontWeight:500}}>{t.dash_chip_revenue_sub}</div>
             </div>
 
             {/* Chip TR — No-shows */}
             <div className="dash-chip dash-chip-dark" style={{right:'5%',top:'18%',animation:'chipFloat2 5.5s ease-in-out infinite'}}>
-              <div style={{fontSize:'.58rem',color:'rgba(255,255,255,.4)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>No-shows</div>
+              <div style={{fontSize:'.58rem',color:'rgba(255,255,255,.4)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>{t.dash_chip_noshows}</div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.45rem',fontWeight:700,color:'#4ade80',lineHeight:1}}>0</div>
-              <div style={{fontSize:'.65rem',color:'rgba(255,255,255,.35)',marginTop:'.3rem'}}>Reminders sent · 18/18</div>
+              <div style={{fontSize:'.65rem',color:'rgba(255,255,255,.35)',marginTop:'.3rem'}}>{t.dash_chip_noshows_sub}</div>
             </div>
 
             {/* Chip BL — Top service */}
             <div className="dash-chip dash-chip-gold" style={{left:'4%',bottom:'14%',animation:'chipFloat1 5s ease-in-out 1s infinite'}}>
-              <div style={{fontSize:'.58rem',color:'var(--gold)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>Top service</div>
+              <div style={{fontSize:'.58rem',color:'var(--gold)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>{t.dash_chip_top}</div>
               <div style={{fontSize:'.85rem',fontWeight:600,color:'var(--ink)',marginBottom:'.15rem'}}>Silk Press</div>
-              <div style={{fontSize:'.65rem',color:'var(--ink-3)'}}>18 bookings · $1,710</div>
+              <div style={{fontSize:'.65rem',color:'var(--ink-3)'}}>{t.dash_chip_top_sub}</div>
             </div>
 
             {/* Chip BR — Appointments */}
             <div className="dash-chip" style={{right:'4%',bottom:'20%',animation:'chipFloat2 4s ease-in-out 2s infinite'}}>
-              <div style={{fontSize:'.58rem',color:'var(--ink-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>Confirmed</div>
+              <div style={{fontSize:'.58rem',color:'var(--ink-3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:'.3rem',fontWeight:500}}>{t.dash_chip_appts}</div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.45rem',fontWeight:700,color:'var(--ink)',lineHeight:1}}>18</div>
-              <div style={{fontSize:'.65rem',color:'var(--ink-3)',marginTop:'.3rem'}}>appointments this month</div>
+              <div style={{fontSize:'.65rem',color:'var(--ink-3)',marginTop:'.3rem'}}>{t.dash_chip_appts_sub}</div>
             </div>
 
             {/* 3D Phone */}
@@ -1259,75 +1242,69 @@ export default function Landing() {
         <div style={{maxWidth:'1100px',margin:'0 auto'}}>
           <div data-rv style={{textAlign:'center',marginBottom:'4.5rem'}}>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
-              <div className="sec-tag-line"/><span className="sec-tag-text">The booking experience</span><div className="sec-tag-line"/>
+              <div className="sec-tag-line"/><span className="sec-tag-text">{t.flow_tag}</span><div className="sec-tag-line"/>
             </div>
             <h2 style={{fontFamily:'Playfair Display,serif',fontSize:'clamp(2.2rem,3.5vw,3rem)',fontWeight:700,color:'var(--ink)',lineHeight:1.1}}>
-              For your client, it's <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>effortless.</em>
+              {t.flow_h2_s} <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>{t.flow_h2_em}</em>
             </h2>
-            <p style={{fontSize:'.9rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.8,maxWidth:'420px',margin:'.85rem auto 0'}}>From discovery to confirmed booking in under 2 minutes. No app. No account. No back-and-forth.</p>
+            <p style={{fontSize:'.9rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.8,maxWidth:'420px',margin:'.85rem auto 0'}}>{t.flow_sub}</p>
           </div>
           <div className="booking-flow-grid" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'1.5rem',alignItems:'start'}}>
-            {[
-              {step:'01',title:'She finds your link',desc:'In your Instagram bio. One tap.',dark:true,screen:(
+            {t.flow_steps.map((s,i)=>{
+              const dark = i < 2
+              const screenLabels = t.flow_screen_labels || ['Instagram Profile','Services','Pick a date','Confirmed']
+              const screens = [
                 <div style={{textAlign:'center',padding:'1rem .5rem'}}>
                   <div style={{width:32,height:32,borderRadius:'50%',background:'#1a1a1a',border:'1px solid rgba(181,137,58,.3)',margin:'0 auto .5rem',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Playfair Display,serif',fontSize:'.75rem',color:'var(--gold)'}}>L</div>
                   <div style={{fontSize:'.62rem',color:'#fff',fontWeight:500,marginBottom:'.2rem'}}>Lilas Hair Studio</div>
                   <div style={{fontSize:'.5rem',color:'rgba(255,255,255,.35)',marginBottom:'.75rem'}}>✂️ Natural Hair Specialist</div>
                   <div style={{background:'var(--gold)',borderRadius:'6px',padding:'.35rem',fontSize:'.55rem',color:'#fff',textAlign:'center',fontWeight:500}}>Book with Lilas ↗</div>
-                </div>
-              )},
-              {step:'02',title:'She picks a service',desc:'Sees your full menu with prices.',dark:true,screen:(
+                </div>,
                 <div style={{padding:'.5rem'}}>
-                  {[['Box Braids','$180','4–6 hrs',true],['Silk Press','$95','2 hrs',false],['Loc Retwist','$120','1.5 hrs',false]].map(([n,p,d,sel],i)=>(
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:'.35rem',padding:'.35rem',border:'1px solid',borderColor:sel?'rgba(181,137,58,.3)':'rgba(255,255,255,.06)',borderRadius:'6px',marginBottom:'.25rem',background:sel?'rgba(181,137,58,.08)':'transparent'}}>
+                  {[['Box Braids','$180','4–6 hrs',true],['Silk Press','$95','2 hrs',false],['Loc Retwist','$120','1.5 hrs',false]].map(([n,p,d,sel],j)=>(
+                    <div key={j} style={{display:'flex',alignItems:'center',gap:'.35rem',padding:'.35rem',border:'1px solid',borderColor:sel?'rgba(181,137,58,.3)':'rgba(255,255,255,.06)',borderRadius:'6px',marginBottom:'.25rem',background:sel?'rgba(181,137,58,.08)':'transparent'}}>
                       <div style={{width:2,height:18,background:'var(--gold)',borderRadius:1,opacity:.5,flexShrink:0}}/>
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:'.55rem',color:'#fff',fontWeight:500}}>{n}</div>
-                        <div style={{fontSize:'.46rem',color:'rgba(255,255,255,.3)'}}>{d}</div>
-                      </div>
+                      <div style={{flex:1}}><div style={{fontSize:'.55rem',color:'#fff',fontWeight:500}}>{n}</div><div style={{fontSize:'.46rem',color:'rgba(255,255,255,.3)'}}>{d}</div></div>
                       <div style={{fontFamily:'Playfair Display,serif',fontSize:'.65rem',color:sel?'var(--gold)':'rgba(255,255,255,.5)'}}>{p}</div>
                     </div>
                   ))}
-                </div>
-              )},
-              {step:'03',title:'She picks date & time',desc:'Sees only your available slots.',dark:false,screen:(
+                </div>,
                 <div style={{padding:'.5rem'}}>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:2,marginBottom:'.5rem'}}>
-                    {['S','M','T','W','T','F','S'].map((d,i)=><div key={i} style={{textAlign:'center',fontSize:'.44rem',color:'var(--ink-3)',padding:'.2rem 0'}}>{d}</div>)}
-                    {[null,null,1,2,3,4,5,6,7,8,9,10,11,12].map((d,i)=>(
-                      <div key={i} style={{textAlign:'center',fontSize:'.52rem',padding:'.25rem 0',borderRadius:'4px',background:d===8?'var(--gold)':d&&[6,7,9].includes(d)?'rgba(181,137,58,.1)':'transparent',color:d===8?'#111':d&&[6,7,9].includes(d)?'var(--gold)':'var(--ink-3)'}}>{d||''}</div>
+                    {['S','M','T','W','T','F','S'].map((d,j)=><div key={j} style={{textAlign:'center',fontSize:'.44rem',color:'var(--ink-3)',padding:'.2rem 0'}}>{d}</div>)}
+                    {[null,null,1,2,3,4,5,6,7,8,9,10,11,12].map((d,j)=>(
+                      <div key={j} style={{textAlign:'center',fontSize:'.52rem',padding:'.25rem 0',borderRadius:'4px',background:d===8?'var(--gold)':d&&[6,7,9].includes(d)?'rgba(181,137,58,.1)':'transparent',color:d===8?'#111':d&&[6,7,9].includes(d)?'var(--gold)':'var(--ink-3)'}}>{d||''}</div>
                     ))}
                   </div>
-                  <div style={{fontSize:'.5rem',color:'var(--ink-3)',marginBottom:'.3rem'}}>Available times — Sat Apr 8</div>
-                  {['9:00 AM','11:00 AM','2:00 PM'].map((t,i)=>(
-                    <div key={i} style={{padding:'.3rem .5rem',border:'1px solid',borderColor:i===0?'var(--gold)':'var(--border)',borderRadius:'5px',fontSize:'.52rem',color:i===0?'var(--gold)':'var(--ink-3)',marginBottom:'.2rem',background:i===0?'rgba(181,137,58,.06)':'transparent'}}>{t}</div>
+                  <div style={{fontSize:'.5rem',color:'var(--ink-3)',marginBottom:'.3rem'}}>Available — Sat Apr 8</div>
+                  {['9:00 AM','11:00 AM','2:00 PM'].map((time,j)=>(
+                    <div key={j} style={{padding:'.3rem .5rem',border:'1px solid',borderColor:j===0?'var(--gold)':'var(--border)',borderRadius:'5px',fontSize:'.52rem',color:j===0?'var(--gold)':'var(--ink-3)',marginBottom:'.2rem',background:j===0?'rgba(181,137,58,.06)':'transparent'}}>{time}</div>
                   ))}
-                </div>
-              )},
-              {step:'04',title:'You confirm. She\'s notified instantly.',desc:'Review the request and approve it — she gets her confirmation the second you do. A reminder goes out automatically before the appointment.',dark:false,screen:(
+                </div>,
                 <div style={{textAlign:'center',padding:'1rem .5rem'}}>
                   <div style={{width:36,height:36,borderRadius:'50%',background:'rgba(46,125,82,.12)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto .75rem',fontSize:'1rem',border:'1px solid rgba(46,125,82,.2)'}}>✓</div>
-                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'.85rem',color:'var(--ink)',marginBottom:'.35rem'}}>Booking confirmed</div>
+                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'.85rem',color:'var(--ink)',marginBottom:'.35rem'}}>{t.booking_confirmed_label||'Booking confirmed'}</div>
                   <div style={{fontSize:'.55rem',color:'var(--ink-3)',lineHeight:1.6,marginBottom:'.75rem'}}>Box Braids with Lilas<br/>Saturday, Apr 8 · 9:00 AM<br/>$180</div>
-                  <div style={{fontSize:'.52rem',color:'rgba(181,137,58,.7)',background:'rgba(181,137,58,.07)',borderRadius:'6px',padding:'.35rem',border:'1px solid rgba(181,137,58,.12)'}}>Reminder sent 24h before ✓</div>
+                  <div style={{fontSize:'.52rem',color:'rgba(181,137,58,.7)',background:'rgba(181,137,58,.07)',borderRadius:'6px',padding:'.35rem',border:'1px solid rgba(181,137,58,.12)'}}>{t.booking_reminder||'Reminder sent 24h before ✓'}</div>
                 </div>
-              )},
-            ].map((s,i)=>(
-              <div key={i} data-rv data-delay={i*100}>
-                <div style={{fontFamily:'Playfair Display,serif',fontSize:'2rem',color:'var(--border)',lineHeight:1,marginBottom:'.75rem'}}>{s.step}</div>
-                <div style={{fontFamily:'Playfair Display,serif',fontSize:'.95rem',color:'var(--ink)',marginBottom:'.3rem',fontWeight:500}}>{s.title}</div>
-                <div style={{fontSize:'.78rem',color:'var(--ink-3)',fontWeight:300,marginBottom:'1.25rem'}}>{s.desc}</div>
-                <div style={{background:s.dark?'#111':'var(--cream)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 20px 48px rgba(0,0,0,.15)',border:s.dark?'1px solid rgba(255,255,255,.06)':'1px solid var(--border)'}}>
-                  <div style={{height:'14px',background:s.dark?'#0a0a0a':'var(--border)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                    <div style={{width:36,height:5,background:s.dark?'#111':'rgba(0,0,0,.1)',borderRadius:5}}/>
+              ]
+              return (
+                <div key={i} data-rv data-delay={i*100}>
+                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'2rem',color:'var(--border)',lineHeight:1,marginBottom:'.75rem'}}>{s.step}</div>
+                  <div style={{fontFamily:'Playfair Display,serif',fontSize:'.95rem',color:'var(--ink)',marginBottom:'.3rem',fontWeight:500}}>{s.title}</div>
+                  <div style={{fontSize:'.78rem',color:'var(--ink-3)',fontWeight:300,marginBottom:'1.25rem'}}>{s.desc}</div>
+                  <div style={{background:dark?'#111':'var(--cream)',borderRadius:'20px',overflow:'hidden',boxShadow:'0 20px 48px rgba(0,0,0,.15)',border:dark?'1px solid rgba(255,255,255,.06)':'1px solid var(--border)'}}>
+                    <div style={{height:'14px',background:dark?'#0a0a0a':'var(--border)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                      <div style={{width:36,height:5,background:dark?'#111':'rgba(0,0,0,.1)',borderRadius:5}}/>
+                    </div>
+                    <div style={{background:dark?'#111':'var(--white)',padding:'.4rem .5rem',borderBottom:dark?'1px solid rgba(255,255,255,.05)':'1px solid var(--border)',fontSize:'.5rem',color:dark?'rgba(255,255,255,.2)':'var(--ink-3)',textAlign:'center',letterSpacing:'.04em'}}>
+                      {screenLabels[i]}
+                    </div>
+                    <div style={{minHeight:'140px'}}>{screens[i]}</div>
                   </div>
-                  <div style={{background:s.dark?'#111':'var(--white)',padding:'.4rem .5rem',borderBottom:s.dark?'1px solid rgba(255,255,255,.05)':'1px solid var(--border)',fontSize:'.5rem',color:s.dark?'rgba(255,255,255,.2)':'var(--ink-3)',textAlign:'center',letterSpacing:'.04em'}}>
-                    {s.step==='01'?'Instagram Profile':s.step==='02'?'Services':s.step==='03'?'Pick a date':'Confirmed'}
-                  </div>
-                  <div style={{minHeight:'140px'}}>{s.screen}</div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
@@ -1337,20 +1314,20 @@ export default function Landing() {
         <div className="how-inner">
           <div className="how-top" data-rv>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
-              <div className="sec-tag-line"/><span className="sec-tag-text">How it works</span><div className="sec-tag-line"/>
+              <div className="sec-tag-line"/><span className="sec-tag-text">{t.how_tag}</span><div className="sec-tag-line"/>
             </div>
-            <h2 className="how-h2">Up and running <em>in minutes.</em></h2>
-            <p className="how-sub">No developers. No technical knowledge. No learning curve. Just a system that works from day one.</p>
+            <h2 className="how-h2">{t.how_h2_s} <em>{t.how_h2_em}</em></h2>
+            <p className="how-sub">{t.how_sub}</p>
           </div>
           <div className="how-steps">
-            {[
-              {icon:<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>,n:'01',title:'Create your account',desc:'Sign up in minutes. No credit card required. Your access starts instantly.'},
-              {icon:<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>,n:'02',title:'Build your profile',desc:'Add your services, products, and formations. Your public booking page goes live the moment you finish.'},
-              {icon:<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,n:'03',title:'Share your link',desc:'One link in your bio. Clients click, book, and pay. You show up and do the work you love.'},
-            ].map((s,i)=>(
+            {t.how_steps.map((s,i)=>(
               <div key={i} className="how-step" data-rv data-delay={i*100}>
                 <div className="how-step-n">{s.n}</div>
-                <div className="how-icon">{s.icon}</div>
+                <div className="how-icon">{[
+                  <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>,
+                  <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>,
+                  <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                ][i]}</div>
                 <div className="how-title">{s.title}</div>
                 <div className="how-desc">{s.desc}</div>
               </div>
@@ -1359,24 +1336,18 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* BETA — replaces fake testimonials */}
+      {/* BETA */}
       <div className="beta-section">
         <div className="beta-inner">
           <div className="beta-top" data-rv>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
-              <div className="sec-tag-line"/><span className="sec-tag-text">Beta program</span><div className="sec-tag-line"/>
+              <div className="sec-tag-line"/><span className="sec-tag-text">{t.beta_tag}</span><div className="sec-tag-line"/>
             </div>
-            <h2 className="beta-h2">We're not going to fake it.<br/><em>Be the proof.</em></h2>
-            <p className="beta-sub">
-              No stock photo testimonials. No made-up numbers. We're building this in the open — with real professionals, real feedback, and real results. We have 15 beta spots. That's it.
-            </p>
+            <h2 className="beta-h2">{t.beta_h2_1}<br/><em>{t.beta_h2_em}</em></h2>
+            <p className="beta-sub">{t.beta_sub}</p>
           </div>
           <div className="beta-cards">
-            {[
-              {icon:'🆓',title:'Completely free',text:'Beta access is free for the entire beta period. No credit card. No catch. In exchange, we ask for honest, structured feedback every two weeks.'},
-              {icon:'🔒',title:'Lock in early pricing',text:'When paid plans launch, beta members get first access and a permanent discount. You helped build it — you should benefit from it.'},
-              {icon:'📣',title:'Shape the product',text:'Your feedback directly changes what we build next. Bug reports, feature requests, friction points — all of it goes straight to the team.'},
-            ].map((c,i)=>(
+            {t.beta_cards.map((c,i)=>(
               <div key={i} className="beta-card" data-rv data-delay={i*100}>
                 <div className="beta-card-icon">{c.icon}</div>
                 <div className="beta-card-title">{c.title}</div>
@@ -1387,15 +1358,15 @@ export default function Landing() {
           <div className="beta-cta-box" data-rv>
             <div className="beta-cta-glow"/>
             <div className="beta-cta-inner">
-              <div className="beta-cta-eyebrow">Limited access</div>
+              <div className="beta-cta-eyebrow">{t.beta_eyebrow}</div>
               <div className="beta-spots">
                 <div className="beta-spots-dot"/>
-                <span className="beta-spots-text">15 beta spots · Applications open now</span>
+                <span className="beta-spots-text">{t.beta_spots}</span>
               </div>
-              <h3 className="beta-cta-h3">Be among the first.<br/><em>Not the last to know.</em></h3>
-              <p className="beta-cta-p">We're looking for hairstylists, nail techs, massage therapists, and other service professionals who are serious about building something better.</p>
+              <h3 className="beta-cta-h3">{t.beta_h3_1}<br/><em>{t.beta_h3_em}</em></h3>
+              <p className="beta-cta-p">{t.beta_p}</p>
               <button className="btn-gold-lg" onClick={()=>navigate('/auth')} style={{fontSize:'1rem',padding:'1.1rem 2.75rem'}}>
-                Apply for beta access
+                {t.beta_apply}
               </button>
             </div>
           </div>
@@ -1407,24 +1378,24 @@ export default function Landing() {
         <div className="pricing-inner">
           <div className="pricing-top" data-rv>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
-              <div className="sec-tag-line"/><span className="sec-tag-text">Pricing</span><div className="sec-tag-line"/>
+              <div className="sec-tag-line"/><span className="sec-tag-text">{t.pricing_tag}</span><div className="sec-tag-line"/>
             </div>
-            <h2 className="pricing-h2">Two plans. <em>One decision.</em></h2>
-            <p className="pricing-sub">Start with Essential. Upgrade to Pro when you're ready to sell more with AI.</p>
+            <h2 className="pricing-h2">{t.pricing_h2_s} <em>{t.pricing_h2_em}</em></h2>
+            <p className="pricing-sub">{t.pricing_sub}</p>
             <div style={{marginTop:'1.25rem',display:'flex',justifyContent:'center'}}>
               <div className="pricing-beta-banner">
                 <div className="pricing-beta-dot"/>
-                <span className="pricing-beta-text">Currently free during beta — paid plans coming soon</span>
+                <span className="pricing-beta-text">{t.pricing_banner}</span>
               </div>
             </div>
           </div>
           <div className="plans">
-            {plans.map((p,i)=>(
+            {activePlans.map((p,i)=>(
               <div key={i} className={`plan ${p.hot?'hot':''}`} data-rv data-delay={i*80}>
-                {p.hot&&<div className="plan-pip">Most popular</div>}
+                {p.hot&&<div className="plan-pip">{t.pricing_popular||'Most popular'}</div>}
                 <div className="plan-tier">{p.tier}</div>
                 <div className="plan-amt"><sup>$</sup>{p.amt}</div>
-                <div className="plan-per">/month · after beta</div>
+                <div className="plan-per">{t.pricing_per}</div>
                 <div className="plan-desc">{p.desc}</div>
                 <div className="plan-line"/>
                 <div className="plan-feats">
@@ -1435,7 +1406,7 @@ export default function Landing() {
                   ))}
                 </div>
                 <button className="plan-btn" onClick={()=>navigate('/auth')}>
-                  {p.hot ? 'Join beta — it\'s free' : 'Start free'}
+                  {p.hot ? t.pricing_join : t.pricing_start}
                 </button>
               </div>
             ))}
@@ -1448,12 +1419,12 @@ export default function Landing() {
         <div className="faq-inner">
           <div className="faq-top" data-rv>
             <div className="sec-tag" style={{justifyContent:'center',marginBottom:'1rem'}}>
-              <div className="sec-tag-line"/><span className="sec-tag-text">Questions</span><div className="sec-tag-line"/>
+              <div className="sec-tag-line"/><span className="sec-tag-text">{t.faq_tag}</span><div className="sec-tag-line"/>
             </div>
-            <h2 className="faq-h2">The answers you're <em>looking for.</em></h2>
+            <h2 className="faq-h2">{t.faq_h2_s} <em>{t.faq_h2_em}</em></h2>
           </div>
           <div className="faq-list" data-rv>
-            {faqs.map((f,i)=>(
+            {activeFaqs.map((f,i)=>(
               <div key={i} className={`faq-item ${openFaq===i?'open':''}`}>
                 <div className="faq-q" onClick={()=>setOpenFaq(openFaq===i?null:i)}>
                   <span className="faq-q-text">{f.q}</span>
@@ -1475,14 +1446,12 @@ export default function Landing() {
         <div className="cta-grain"/>
         <div className="cta-glow"/>
         <div className="cta-inner" data-rv>
-          <div className="cta-eyebrow"><div className="cta-line"/><span className="cta-label">The decision</span><div className="cta-line"/></div>
-          <h2 className="cta-h2">Your craft is <em>exceptional.</em><br/>Your system should be too.</h2>
-          <p className="cta-sub">
-            Stop running your business from a DM inbox. Fifteen beta spots. Free access. Honest feedback in return. That's the deal.
-          </p>
+          <div className="cta-eyebrow"><div className="cta-line"/><span className="cta-label">{t.cta_label}</span><div className="cta-line"/></div>
+          <h2 className="cta-h2">{t.cta_h2_1} <em>{t.cta_h2_em}</em><br/>{t.cta_h2_2}</h2>
+          <p className="cta-sub">{t.cta_sub}</p>
           <div className="cta-actions">
-            <button className="btn-gold-lg" onClick={()=>navigate('/auth')} style={{fontSize:'1rem',padding:'1.1rem 2.75rem'}}>Claim your beta spot — free</button>
-            <button className="btn-ghost-lg" onClick={()=>document.getElementById('faq')?.scrollIntoView({behavior:'smooth'})}>Read the FAQ</button>
+            <button className="btn-gold-lg" onClick={()=>navigate('/auth')} style={{fontSize:'1rem',padding:'1.1rem 2.75rem'}}>{t.cta_btn}</button>
+            <button className="btn-ghost-lg" onClick={()=>document.getElementById('faq')?.scrollIntoView({behavior:'smooth'})}>{t.cta_ghost}</button>
           </div>
         </div>
       </div>
@@ -1492,31 +1461,34 @@ export default function Landing() {
         <div className="f-top">
           <div className="f-logo"><span translate="no">Organized</span><span>.</span></div>
           <div className="f-links">
-            {['Privacy','Terms','Contact'].map(l=><span key={l} className="f-link">{l}</span>)}
+            {t.footer_links.map(l=><span key={l} className="f-link">{l}</span>)}
           </div>
         </div>
         <div className="f-bottom">
           <div className="f-copy">© 2026 <span translate="no">Organized</span> — beorganized.io</div>
           <div className="f-socials">
-            {/* Instagram */}
             <a className="f-social" href="https://instagram.com/beorganized.io" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
-            {/* TikTok */}
             <a className="f-social" href="https://tiktok.com/@beorganized.io" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
               <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
             </a>
-            {/* Facebook */}
             <a className="f-social" href="https://facebook.com/beorganized" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            {/* X / Twitter */}
             <a className="f-social" href="https://x.com/beorganized" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
               <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
           </div>
         </div>
       </footer>
+      {/* FLOATING LANG TOGGLE */}
+      <div className="lang-float">
+        <button className={`lang-btn${lang==='en'?' active':''}`} onClick={()=>setLang('en')}>EN</button>
+        <div className="lang-sep"/>
+        <button className={`lang-btn${lang==='fr'?' active':''}`} onClick={()=>setLang('fr')}>FR</button>
+      </div>
+
     </div>
   )
 }
