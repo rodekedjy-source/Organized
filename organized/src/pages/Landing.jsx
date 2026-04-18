@@ -69,6 +69,7 @@ button:active { transform: scale(.97) !important; }
 .nav-cta:hover { background:#9e7630; transform:translateY(-1px) !important; box-shadow:0 6px 20px rgba(181,137,58,.3); }
 .lang-float { position:fixed; bottom:1.75rem; right:1.5rem; z-index:999; display:flex; align-items:center; background:rgba(12,11,9,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.1); border-radius:100px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.22); transition:opacity .3s, transform .3s; }
 .lang-float:hover { opacity:1 !important; }
+@media(max-width:600px){ .lang-float{ bottom:5.5rem; right:1rem; } }
 .lang-btn { font-size:.65rem; padding:.38rem .7rem; cursor:pointer; background:transparent; color:rgba(255,255,255,.38); border:none; font-family:inherit; font-weight:700; letter-spacing:.08em; transition:color .2s, background .2s; line-height:1; }
 .lang-btn.active { color:var(--gold); }
 .lang-sep { width:1px; height:11px; background:rgba(255,255,255,.12); flex-shrink:0; }
@@ -483,6 +484,7 @@ const COPY = {
     lilas_q:'"This is the week thousands of service professionals are living right now. We built\u00A0Organized to end it."',
     lilas_attr:'— The Organized. team',
     phone_tag:'Your public profile', phone_h2_s:'One link.', phone_h2_em:'Everything they need.',
+    phone_tab_book:'Book', phone_tab_shop:'Shop', phone_tab_form:'Formations', phone_stitle:'Services', phone_book_btn:'Book',
     phone_desc:"Drop it in your bio. Your clients book appointments, shop your products, and enroll in your courses — without ever DMing you. You focus on the craft. Organized handles everything else.",
     phone_pts:[
       {icon:'📅',title:'Appointments booked 24/7',desc:'Real-time availability. Automated confirmations. Zero back-and-forth.'},
@@ -529,7 +531,7 @@ const COPY = {
     footer_links:['Privacy','Terms','Contact'],
   },
   fr: {
-    nav_how:'Comment ça marche', nav_pricing:'Tarifs', nav_faq:'FAQ', nav_signin:'Se connecter', nav_cta:'Commencer gratuitement',
+    nav_how:'Comment ça marche', nav_pricing:'Tarifs', nav_faq:'FAQ', nav_signin:'Connexion', nav_cta:'Commencer gratuitement',
     hero_label:'Conçu pour les professionnelles du service',
     hero_sub_start:"Laissez vos clientes vous réserver directement —",
     hero_sub_strong:"fini les allers-retours,",
@@ -550,6 +552,7 @@ const COPY = {
     lilas_q:"\"C'est la semaine que vivent des milliers de professionnelles en ce moment. On a bâti\u00A0Organized pour y mettre fin.\"",
     lilas_attr:"— L'équipe Organized.",
     phone_tag:'Votre profil public', phone_h2_s:'Un seul lien.', phone_h2_em:'Tout ce dont elles ont besoin.',
+    phone_tab_book:'Réserver', phone_tab_shop:'Boutique', phone_tab_form:'Formations', phone_stitle:'Services', phone_book_btn:'Réserver',
     phone_desc:"Mettez-le dans votre bio. Vos clientes réservent, magasinent vos produits et s'inscrivent à vos formations — sans jamais vous écrire. Vous vous concentrez sur votre art. Organized gère tout le reste.",
     phone_pts:[
       {icon:'📅',title:'Rendez-vous 24h/24',desc:'Disponibilités en temps réel. Confirmations automatiques. Zéro aller-retour.'},
@@ -1006,18 +1009,18 @@ export default function Landing() {
                   <div className="ip-sub">Natural Hair Specialist · Montreal, QC</div>
                 </div>
                 <div className="ip-tabs">
-                  <div className="ip-tab on">Book</div>
-                  <div className="ip-tab">Shop</div>
-                  <div className="ip-tab">Formations</div>
+                  <div className="ip-tab on">{t.phone_tab_book}</div>
+                  <div className="ip-tab">{t.phone_tab_shop}</div>
+                  <div className="ip-tab">{t.phone_tab_form}</div>
                 </div>
                 <div className="ip-scroll">
-                  <div className="ip-stitle">Services</div>
+                  <div className="ip-stitle">{t.phone_stitle}</div>
                   {[['Box Braids','4–6 hrs','$180'],['Silk Press','2 hrs','$95'],['Loc Retwist','1.5 hrs','$120'],['Color & Cut','3 hrs','$220']].map(([n,d,p],i)=>(
                     <div key={i} className="ip-svc">
                       <div className="ip-bar"/>
                       <div className="ip-info"><div className="ip-sname">{n}</div><div className="ip-dur">{d}</div></div>
                       <div className="ip-price">{p}</div>
-                      <button className="ip-book">Book</button>
+                      <button className="ip-book">{t.phone_book_btn}</button>
                     </div>
                   ))}
                 </div>
