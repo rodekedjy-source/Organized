@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 // ── TRANSLATIONS ──────────────────────────────────────────────────────────────
@@ -1718,23 +1718,7 @@ function ProductEditModal({ product, workspaceId, onClose, onSaved, onDeleted, t
   )
 }
 
-// =============================================================================
-// INSTRUCTIONS — read once, then delete these comments before saving
-// =============================================================================
-// In Dashboard.jsx, find and DELETE these 5 functions (in whatever order
-// they currently appear — old AND new duplicates):
-//
-//   1. function ImageEditModal(
-//   2. function EnhanceModal(
-//   3. function AddProductView(
-//   4. function ProductDetailView(
-//   5. function Products(
-//
-// Delete ALL of them. Then paste this entire file in their place,
-// right before `function Formations(`.
-//
-// Do NOT touch anything else in Dashboard.jsx.
-// =============================================================================
+
 
 
 // ─── 1. IMAGE EDIT MODAL ─────────────────────────────────────────────────────
@@ -2202,61 +2186,123 @@ function ProductDetailView({ product, workspace, toast, onSave, onDelete, onBack
 }
 
 // ─── 5. PRODUCTS (main) ───────────────────────────────────────────────────────
+// ─── REPLACE ONLY `function Products({` with this ────────────────────────────
+// Single atomic state — no race condition possible between view + selectedProduct
+// Error boundary built in — shows actual error instead of blank screen
+// ─────────────────────────────────────────────────────────────────────────────
+
+class ProductsErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(e) { return { error: e } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding:'2rem', background:'#fff3f3', border:'1px solid #fecaca', borderRadius:'12px', margin:'1rem 0' }}>
+          <div style={{ fontWeight:600, color:'#c0392b', marginBottom:'.5rem' }}>Something went wrong in Products</div>
+          <div style={{ fontSize:'.82rem', color:'#7a7774', fontFamily:'monospace', whiteSpace:'pre-wrap' }}>
+            {this.state.error?.message}
+          </div>
+          <button onClick={() => this.setState({ error: null })} style={{ marginTop:'1rem', padding:'.5rem 1rem', background:'#c0392b', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'.82rem' }}>
+            Try again
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function Products({ workspace, toast }) {
-  const [view, setView]                       = useState('list')
-  const [data, setData]                       = useState([])
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  // Single atomic state — view and product always update together
+  const [scene, setScene] = useState({ type: 'list', product: null })
+  const [data, setData]   = useState([])
 
   useEffect(() => { if (workspace) fetchData() }, [workspace])
 
   async function fetchData() {
-    const { data } = await supabase.from('products').select('*').eq('workspace_id', workspace.id).order('created_at', { ascending:false })
+    const { data } = await supabase
+      .from('products').select('*')
+      .eq('workspace_id', workspace.id)
+      .order('created_at', { ascending: false })
     setData(data || [])
   }
 
   async function saveProduct(id, updates, newImageFile) {
     if (!workspace) return
-    let image_url = selectedProduct?.image_url || null
+    let image_url = scene.product?.image_url || null
     if (newImageFile) {
       const ext  = newImageFile.name?.split('.').pop() || 'jpg'
       const path = `${workspace.id}/${Date.now()}.${ext}`
-      await supabase.storage.from('product-images').upload(path, newImageFile, { upsert:true })
+      await supabase.storage.from('product-images').upload(path, newImageFile, { upsert: true })
       const { data: ud } = supabase.storage.from('product-images').getPublicUrl(path)
       image_url = ud.publicUrl
     }
     const { error } = await supabase.from('products').update({ ...updates, image_url }).eq('id', id)
     if (error) toast('Error: ' + error.message)
-    else { toast('Product updated.'); setView('list'); fetchData() }
+    else { toast('Product updated.'); goList() }
   }
 
   async function deleteProduct(id, name) {
     await supabase.from('products').delete().eq('id', id)
     toast(name + ' deleted.')
-    setView('list'); fetchData()
+    goList()
   }
 
-  if (!workspace) return <div style={{ padding:'2rem', color:'var(--ink-3)', fontSize:'.85rem' }}>Loading...</div>
-  if (view === 'add') return <AddProductView workspace={workspace} toast={toast} onBack={() => { setView('list'); fetchData() }}/>
-  if (view === 'detail' && selectedProduct) return <ProductDetailView product={selectedProduct} workspace={workspace} toast={toast} onSave={saveProduct} onDelete={deleteProduct} onBack={() => { setView('list'); fetchData() }}/>
+  function goList()           { fetchData(); setScene({ type: 'list',   product: null }) }
+  function goAdd()            { setScene({ type: 'add',    product: null }) }
+  function goDetail(product)  { setScene({ type: 'detail', product }) }
 
+  if (!workspace) return (
+    <div style={{ padding:'2rem', color:'var(--ink-3)', fontSize:'.85rem' }}>Loading...</div>
+  )
+
+  if (scene.type === 'add') return (
+    <ProductsErrorBoundary>
+      <AddProductView workspace={workspace} toast={toast} onBack={goList}/>
+    </ProductsErrorBoundary>
+  )
+
+  if (scene.type === 'detail') return (
+    <ProductsErrorBoundary>
+      <ProductDetailView
+        product={scene.product}
+        workspace={workspace}
+        toast={toast}
+        onSave={saveProduct}
+        onDelete={deleteProduct}
+        onBack={goList}
+      />
+    </ProductsErrorBoundary>
+  )
+
+  // ── List view
   return (
     <div>
       <div className="db-page-head">
-        <div><div className="db-page-title">Products</div><div className="db-page-sub">Sell from your profile page</div></div>
-        <button className="db-btn db-btn-primary" onClick={() => setView('add')}>Add product</button>
+        <div>
+          <div className="db-page-title">Products</div>
+          <div className="db-page-sub">Sell from your profile page</div>
+        </div>
+        <button className="db-btn db-btn-primary" onClick={goAdd}>Add product</button>
       </div>
+
       {data.length === 0 ? (
         <div className="db-card" style={{ padding:'3rem 2rem', textAlign:'center' }}>
           <div style={{ fontSize:'2.5rem', marginBottom:'.75rem' }}>📦</div>
           <div style={{ fontWeight:600, color:'var(--ink)', marginBottom:'.4rem' }}>No products yet</div>
-          <div style={{ fontSize:'.82rem', color:'var(--ink-3)', marginBottom:'1.4rem' }}>Add your first product and enhance it with AI</div>
-          <button className="db-btn db-btn-primary" onClick={() => setView('add')}>Add your first product</button>
+          <div style={{ fontSize:'.82rem', color:'var(--ink-3)', marginBottom:'1.4rem' }}>
+            Add your first product and enhance it with AI
+          </div>
+          <button className="db-btn db-btn-primary" onClick={goAdd}>Add your first product</button>
         </div>
       ) : (
         <div className="db-grid-3">
           {data.map(p => (
-            <div key={p.id} className="db-prod-card" style={{ cursor:'pointer', transition:'transform .15s, box-shadow .15s' }}
-              onClick={() => { setSelectedProduct(p); setView('detail') }}
+            <div
+              key={p.id}
+              className="db-prod-card"
+              style={{ cursor:'pointer', transition:'transform .15s, box-shadow .15s' }}
+              onClick={() => goDetail(p)}
               onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,.1)' }}
               onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='none' }}
             >
