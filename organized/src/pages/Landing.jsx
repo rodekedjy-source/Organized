@@ -67,6 +67,18 @@ button:active { transform: scale(.97) !important; }
 .nav.scrolled .nav-signin:hover { color:var(--ink); }
 .nav-cta { background:var(--gold); color:#fff; border:none; border-radius:7px; padding:.52rem 1.35rem; font-size:.78rem; font-weight:500; cursor:pointer; font-family:inherit; }
 .nav-cta:hover { background:#9e7630; transform:translateY(-1px) !important; box-shadow:0 6px 20px rgba(181,137,58,.3); }
+.lang-toggle { display:flex; align-items:center; border:1px solid rgba(255,255,255,.18); border-radius:6px; overflow:hidden; }
+.nav.scrolled .lang-toggle { border-color:var(--border); }
+.lang-btn { font-size:.7rem; padding:.28rem .55rem; cursor:pointer; background:transparent; color:rgba(255,255,255,.38); border:none; font-family:inherit; font-weight:600; letter-spacing:.04em; transition:all .18s; line-height:1; }
+.lang-btn.active { background:rgba(255,255,255,.14); color:#fff; }
+.nav.scrolled .lang-btn { color:var(--ink-3); }
+.nav.scrolled .lang-btn.active { background:var(--ink); color:#fff; }
+.lang-toggle { display:flex; align-items:center; gap:2px; background:rgba(255,255,255,.1); border-radius:20px; padding:3px; margin-left:.25rem; }
+.nav.scrolled .lang-toggle { background:rgba(0,0,0,.07); }
+.lang-btn { background:transparent; color:rgba(255,255,255,.4); border:none; border-radius:14px; padding:3px 10px; font-size:.62rem; font-weight:500; cursor:pointer; font-family:inherit; letter-spacing:.06em; text-transform:uppercase; transition:all .2s; }
+.lang-btn.active { background:rgba(255,255,255,.15); color:#fff; font-weight:700; }
+.nav.scrolled .lang-btn { color:var(--ink-3); }
+.nav.scrolled .lang-btn.active { background:rgba(181,137,58,.12); color:var(--gold); font-weight:700; }
 
 /* HERO */
 .hero { min-height:100vh; background:var(--ink); position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9rem 3rem 7rem; text-align:center; }
@@ -78,7 +90,7 @@ button:active { transform: scale(.97) !important; }
 .hero-label { display:inline-flex; align-items:center; gap:.65rem; margin-bottom:2.25rem; animation:fadeUp .7s ease both; }
 .hero-label-line { width:32px; height:1px; background:var(--gold); }
 .hero-label-text { font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); font-weight:500; }
-.hero-h1 { font-family:'Playfair Display',serif; font-size:clamp(3.2rem,7vw,6.5rem); font-weight:700; color:#fff; line-height:1.02; letter-spacing:-.025em; margin-bottom:2rem; animation:fadeUp .8s .1s ease both; }
+.hero-h1 { font-family:'Playfair Display',serif; font-size:clamp(2rem,7vw,6.5rem); font-weight:700; color:#fff; line-height:1.05; letter-spacing:-.02em; margin-bottom:2rem; animation:fadeUp .8s .1s ease both; }
 .hero-h1 em { font-style:italic; font-weight:400; color:var(--gold); }
 .hero-divider { width:40px; height:1px; background:rgba(255,255,255,.2); margin:0 auto 2rem; animation:fadeUp .7s .2s ease both; }
 .hero-sub { font-size:1.1rem; color:rgba(255,255,255,.45); line-height:1.85; font-weight:300; max-width:520px; margin:0 auto 3rem; animation:fadeUp .8s .25s ease both; }
@@ -309,6 +321,8 @@ footer { background:#090907; padding:2.5rem 3rem; border-top:1px solid rgba(255,
   .booking-flow-grid{grid-template-columns:1fr !important;}
   .nav{padding:0 1.25rem;} .nav-links{display:none;}
   .hero{padding:7rem 1.5rem 6rem;}
+  .hero-h1{font-size:clamp(1.75rem,8.5vw,2.8rem);letter-spacing:-.01em;line-height:1.08;}
+  .hero-sub{font-size:.95rem;margin:0 auto 2.5rem;}
   .mirror{padding:5rem 1.5rem;}
   .phone-inner,.how-inner,.pricing-inner,.faq-inner,.beta-inner{padding:5rem 1.5rem;}
   .phone-section,.beta-section,.how-section,.pricing-section,.faq-section,.cta{padding:5rem 1.5rem;}
@@ -453,6 +467,182 @@ const faqs = [
     a:'No questions, no retention emails, no dark patterns. Cancel anytime from your dashboard in one click. Your data can be exported before you go.' },
 ]
 
+const COPY = {
+  en: {
+    nav_how:'How it works', nav_pricing:'Pricing', nav_faq:'FAQ', nav_signin:'Sign in', nav_cta:'Get started free',
+    hero_label:'Built for service professionals',
+    hero_sub_start:"Let your clients book you directly —",
+    hero_sub_strong:"no more back-and-forth\u00A0DMs,",
+    hero_sub_end:"no more confusion, no more missed opportunity.",
+    hero_cta:'Claim Your Spot — Free', hero_see:'See how it works',
+    hero_note:'Early access is open — limited spots · Free during beta · No credit card',
+    sf_tag:'Sound familiar?', sf_h2_s:'This is how every booking', sf_h2_em:'starts.',
+    sf_sub:'Back-and-forth. Every single time. Meanwhile the client loses patience — and you lose money.',
+    sf_quote:'"And that\'s just to confirm one appointment."',
+    sf_hint:'Stop managing bookings.', sf_hint_s:'Start taking them.',
+    lilas_tag:'The professional we built this for', lilas_h2_s:'This is', lilas_h2_em:'your week.',
+    lilas_sub:"Talented. Fully booked — or so it seems. Here's what the reality actually looks like.",
+    before_label:'Before\u00A0Organized', after_label:'After\u00A0Organized',
+    before_q:'"23 unread DMs. 3 missed bookings. And it\'s only Monday."',
+    after_q:'"Monday morning. 4 confirmed bookings. Phone still quiet."',
+    before_b:['Lost 3 bookings that week — clients went elsewhere','Spent 4 hrs/day managing messages','Missed a $220 booking — never saw the DM'],
+    after_b:['Zero unanswered messages — clients book themselves','4 hrs/day freed — spent doing what she loves','Never missed a booking again'],
+    lilas_q:'"This is the week thousands of service professionals are living right now. We built\u00A0Organized to end it."',
+    lilas_attr:'— The Organized. team',
+    phone_tag:'Your public profile', phone_h2_s:'One link.', phone_h2_em:'Everything they need.',
+    phone_desc:"Drop it in your bio. Your clients book appointments, shop your products, and enroll in your courses — without ever DMing you. You focus on the craft. Organized handles everything else.",
+    phone_pts:[
+      {icon:'📅',title:'Appointments booked 24/7',desc:'Real-time availability. Automated confirmations. Zero back-and-forth.'},
+      {icon:'🛍️',title:'Products sold directly',desc:'Your shop lives on your profile. Clients discover and order instantly.'},
+      {icon:'🎓',title:'Formations & courses',desc:'Monetize your expertise. Sell knowledge alongside your services.'},
+      {icon:'👥',title:'Clients tracked automatically',desc:'Every visit, every dollar, every relationship — organized for you.'},
+    ],
+    dash_tag:'Your dashboard', dash_h2_s:'Your business.', dash_h2_em:'At a glance.',
+    dash_sub:'Every booking, every sale, every client — organized the moment it happens. No spreadsheets. No missed DMs. No confusion.',
+    flow_tag:'The booking experience', flow_h2_s:"For your client, it's", flow_h2_em:'effortless.',
+    flow_sub:'From discovery to confirmed booking in under 2 minutes. No app. No account. No back-and-forth.',
+    flow_steps:[
+      {step:'01',title:'She finds your link',desc:'In your Instagram bio. One tap.'},
+      {step:'02',title:'She picks a service',desc:'Sees your full menu with prices.'},
+      {step:'03',title:'She picks date & time',desc:'Sees only your available slots.'},
+      {step:'04',title:"You confirm. She's notified instantly.",desc:'Review the request and approve it — she gets her confirmation the second you do. A reminder goes out automatically before the appointment.'},
+    ],
+    how_tag:'How it works', how_h2_s:'Up and running', how_h2_em:'in minutes.',
+    how_sub:'No developers. No technical knowledge. No learning curve. Just a system that works from day one.',
+    how_steps:[
+      {n:'01',title:'Create your account',desc:'Sign up in minutes. No credit card required. Your access starts instantly.'},
+      {n:'02',title:'Build your profile',desc:'Add your services, products, and formations. Your public booking page goes live the moment you finish.'},
+      {n:'03',title:'Share your link',desc:"One link in your bio. Clients click, book, and pay. You show up and do the work you love."},
+    ],
+    beta_tag:'Beta program', beta_h2_1:"We're not going to fake it.", beta_h2_em:'Be the proof.',
+    beta_sub:"No stock photo testimonials. No made-up numbers. We're building this in the open — with real professionals, real feedback, and real results. We have 15 beta spots. That's it.",
+    beta_cards:[
+      {icon:'🆓',title:'Completely free',text:"Beta access is free for the entire beta period. No credit card. No catch. In exchange, we ask for honest, structured feedback every two weeks."},
+      {icon:'🔒',title:'Lock in early pricing',text:"When paid plans launch, beta members get first access and a permanent discount. You helped build it — you should benefit from it."},
+      {icon:'📣',title:'Shape the product',text:"Your feedback directly changes what we build next. Bug reports, feature requests, friction points — all of it goes straight to the team."},
+    ],
+    beta_eyebrow:'Limited access', beta_spots:'15 beta spots · Applications open now',
+    beta_h3_1:'Be among the first.', beta_h3_em:'Not the last to know.',
+    beta_p:"We're looking for hairstylists, nail techs, massage therapists, and other service professionals who are serious about building something better.",
+    beta_apply:'Apply for beta access',
+    pricing_tag:'Pricing', pricing_h2_s:'Two plans.', pricing_h2_em:'One decision.',
+    pricing_sub:"Start with Essential. Upgrade to Pro when you're ready to sell more with AI.",
+    pricing_banner:'Currently free during beta — paid plans coming soon',
+    pricing_per:'/month · after beta', pricing_join:"Join beta — it's free", pricing_start:'Start free',
+    faq_tag:'Questions', faq_h2_s:"The answers you're", faq_h2_em:'looking for.',
+    cta_label:'The decision', cta_h2_1:'Your craft is', cta_h2_em:'exceptional.', cta_h2_2:'Your system should be too.',
+    cta_sub:"Stop running your business from a DM inbox. Fifteen beta spots. Free access. Honest feedback in return. That's the deal.",
+    cta_btn:'Claim your beta spot — free', cta_ghost:'Read the FAQ',
+    footer_links:['Privacy','Terms','Contact'],
+  },
+  fr: {
+    nav_how:'Comment ça marche', nav_pricing:'Tarifs', nav_faq:'FAQ', nav_signin:'Se connecter', nav_cta:'Commencer gratuitement',
+    hero_label:'Conçu pour les professionnelles du service',
+    hero_sub_start:"Laissez vos clientes vous réserver directement —",
+    hero_sub_strong:"fini les allers-retours,",
+    hero_sub_end:"la confusion et les occasions manquées.",
+    hero_cta:'Réserver ma place — Gratuit', hero_see:'Voir comment ça marche',
+    hero_note:'Accès anticipé ouvert — places limitées · Gratuit en bêta · Sans carte de crédit',
+    sf_tag:'Ça vous parle ?', sf_h2_s:"C'est comme ça que chaque réservation", sf_h2_em:'commence.',
+    sf_sub:"Aller-retour. À chaque fois. Pendant ce temps, la cliente perd patience — et vous perdez de l'argent.",
+    sf_quote:"\"Et c'est juste pour confirmer un seul rendez-vous.\"",
+    sf_hint:'Arrêtez de gérer vos réservations.', sf_hint_s:'Commencez à les prendre.',
+    lilas_tag:'La professionnelle pour qui on a tout bâti', lilas_h2_s:"C'est", lilas_h2_em:'votre semaine.',
+    lilas_sub:"Talentueuse. Complètement bookée — ou presque. Voilà ce que la réalité ressemble vraiment.",
+    before_label:'Avant\u00A0Organized', after_label:'Après\u00A0Organized',
+    before_q:"\"23 DMs non lus. 3 réservations manquées. Et c'est seulement lundi.\"",
+    after_q:"\"Lundi matin. 4 réservations confirmées. Téléphone silencieux.\"",
+    before_b:["Perdu 3 réservations — les clientes sont allées ailleurs","4h/jour à gérer des messages","Manqué un rendez-vous à 220$ — jamais vu le DM"],
+    after_b:["Zéro message sans réponse — les clientes réservent elles-mêmes","4h/jour libérées — consacrées à ce qu'elle aime","Plus jamais de réservation manquée"],
+    lilas_q:"\"C'est la semaine que vivent des milliers de professionnelles en ce moment. On a bâti\u00A0Organized pour y mettre fin.\"",
+    lilas_attr:"— L'équipe Organized.",
+    phone_tag:'Votre profil public', phone_h2_s:'Un seul lien.', phone_h2_em:'Tout ce dont elles ont besoin.',
+    phone_desc:"Mettez-le dans votre bio. Vos clientes réservent, magasinent vos produits et s'inscrivent à vos formations — sans jamais vous écrire. Vous vous concentrez sur votre art. Organized gère tout le reste.",
+    phone_pts:[
+      {icon:'📅',title:'Rendez-vous 24h/24',desc:'Disponibilités en temps réel. Confirmations automatiques. Zéro aller-retour.'},
+      {icon:'🛍️',title:'Produits vendus directement',desc:'Votre boutique est sur votre profil. Les clientes découvrent et commandent instantanément.'},
+      {icon:'🎓',title:'Formations & cours',desc:"Monétisez votre expertise. Vendez vos connaissances en plus de vos services."},
+      {icon:'👥',title:'Clientes suivies automatiquement',desc:'Chaque visite, chaque dollar, chaque relation — organisés pour vous.'},
+    ],
+    dash_tag:'Votre tableau de bord', dash_h2_s:'Votre business.', dash_h2_em:"D'un coup d'œil.",
+    dash_sub:"Chaque réservation, chaque vente, chaque cliente — organisées dès que ça arrive. Pas de tableur. Pas de message manqué. Pas de confusion.",
+    flow_tag:"L'expérience de réservation", flow_h2_s:"Pour votre cliente, c'est", flow_h2_em:'simple.',
+    flow_sub:"De la découverte à la réservation confirmée en moins de 2 minutes. Sans app. Sans compte. Sans allers-retours.",
+    flow_steps:[
+      {step:'01',title:'Elle trouve votre lien',desc:'Dans votre bio Instagram. Un seul tap.'},
+      {step:'02',title:'Elle choisit un service',desc:'Voit votre menu complet avec les prix.'},
+      {step:'03',title:'Elle choisit date & heure',desc:'Ne voit que vos créneaux disponibles.'},
+      {step:'04',title:"Vous confirmez. Elle est notifiée.",desc:"Consultez la demande et approuvez — elle reçoit sa confirmation en temps réel. Un rappel part automatiquement avant le rendez-vous."},
+    ],
+    how_tag:'Comment ça marche', how_h2_s:'Opérationnel', how_h2_em:'en quelques minutes.',
+    how_sub:"Pas de développeur. Pas de connaissances techniques. Pas de courbe d'apprentissage. Un système qui fonctionne dès le premier jour.",
+    how_steps:[
+      {n:'01',title:'Créez votre compte',desc:"Inscrivez-vous en quelques minutes. Sans carte de crédit. L'accès est immédiat."},
+      {n:'02',title:'Construisez votre profil',desc:"Ajoutez vos services, produits et formations. Votre page de réservation est en ligne dès que vous avez terminé."},
+      {n:'03',title:'Partagez votre lien',desc:"Un lien dans votre bio. Les clientes cliquent, réservent et paient. Vous vous présentez et faites ce que vous aimez."},
+    ],
+    beta_tag:'Programme bêta', beta_h2_1:"On ne va pas faire semblant.", beta_h2_em:'Soyez la preuve.',
+    beta_sub:"Pas de témoignages avec des photos de stock. Pas de chiffres inventés. On construit ça à l'ouvert — avec de vraies professionnelles, de vrais retours, de vrais résultats. On a 15 places bêta. C'est tout.",
+    beta_cards:[
+      {icon:'🆓',title:'Complètement gratuit',text:"L'accès bêta est gratuit pour toute la durée de la bêta. Sans carte de crédit. Sans piège. En échange, on demande des retours honnêtes toutes les deux semaines."},
+      {icon:'🔒',title:'Bloquez le prix anticipé',text:"Quand les forfaits payants seront lancés, les membres bêta auront un accès prioritaire et une réduction permanente. Vous avez aidé à le construire — vous devriez en bénéficier."},
+      {icon:'📣',title:'Façonnez le produit',text:"Vos retours changent directement ce qu'on construit ensuite. Bugs, demandes de fonctionnalités, points de friction — tout va directement à l'équipe."},
+    ],
+    beta_eyebrow:'Accès limité', beta_spots:'15 places bêta · Candidatures ouvertes',
+    beta_h3_1:'Soyez parmi les premières.', beta_h3_em:'Pas les dernières à savoir.',
+    beta_p:"On cherche des coiffeuses, des techniciennes en ongles, des massothérapeutes et d'autres professionnelles du service qui veulent vraiment bâtir quelque chose de mieux.",
+    beta_apply:"Postuler pour l'accès bêta",
+    pricing_tag:'Tarifs', pricing_h2_s:'Deux forfaits.', pricing_h2_em:'Une décision.',
+    pricing_sub:"Commencez avec Essential. Passez à Pro quand vous êtes prête à vendre plus avec l'IA.",
+    pricing_banner:'Actuellement gratuit en bêta — forfaits payants bientôt',
+    pricing_per:'/mois · après la bêta', pricing_join:"Rejoindre la bêta — gratuit", pricing_start:'Commencer gratuitement',
+    faq_tag:'Questions', faq_h2_s:"Les réponses que vous", faq_h2_em:'cherchez.',
+    cta_label:'La décision', cta_h2_1:'Votre art est', cta_h2_em:'exceptionnel.', cta_h2_2:"Votre système devrait l'être aussi.",
+    cta_sub:"Arrêtez de gérer votre business depuis une boîte de réception. Quinze places bêta. Accès gratuit. Retours honnêtes en échange. C'est l'accord.",
+    cta_btn:'Réserver votre place bêta — gratuit', cta_ghost:'Lire la FAQ',
+    footer_links:['Confidentialité','Conditions','Contact'],
+  }
+}
+
+const plans_fr = [
+  { tier:'Essential', amt:39, desc:'Tout ce dont vous avez besoin pour gérer votre business sans le chaos.', hot:false,
+    feats:[
+      {y:true,  t:'Profil public & page de réservation'},
+      {y:true,  t:'Services illimités'},
+      {y:true,  t:'Boutique de produits'},
+      {y:true,  t:'Formations & cours'},
+      {y:true,  t:'Gestion des clientes'},
+      {y:true,  t:'Analyse des revenus'},
+      {y:true,  t:'Rappels automatiques — fini les no-shows'},
+      {y:false, t:'Amélioration IA des photos produits'},
+      {y:false, t:'Support prioritaire'},
+    ]},
+  { tier:'Pro', amt:79, desc:'Pour les professionnelles qui veulent se démarquer et vendre plus.', hot:true,
+    feats:[
+      {y:true, t:'Tout ce qui est dans Essential'},
+      {y:true, t:'Amélioration IA des photos produits ✦'},
+      {y:true, t:'Styles studio & glamour'},
+      {y:true, t:'Support prioritaire'},
+      {y:true, t:"Accès anticipé aux nouvelles fonctionnalités"},
+      {y:true, t:'Prix bloqué — pour toujours'},
+    ]},
+]
+
+const faqs_fr = [
+  { q:'Ma cliente doit-elle télécharger une app ou créer un compte ?',
+    a:"Non. Elle tape sur votre lien, choisit un service, une heure, et confirme. Pas d'app. Pas de compte. Pas de friction. En moyenne, une réservation prend moins de 2 minutes." },
+  { q:'Que se passe-t-il après la période bêta gratuite ?',
+    a:"Quand on lance les forfaits payants, les membres bêta seront les premiers informés — et les derniers à payer. On vous donnera une fenêtre gratuite prolongée avant tout changement, et vous bloquerez le prix anticipé." },
+  { q:"Puis-je garder mon système de réservation actuel pendant que j'essaie ?",
+    a:"Oui. On ne vous demande pas de tout brûler. Utilisez les deux, comparez, et décidez. La plupart des gens arrêtent d'utiliser leur ancien système dans la première semaine." },
+  { q:'Mes données sont-elles sécurisées ?',
+    a:"Construit sur Supabase avec une sécurité de niveau entreprise. Sécurité au niveau des lignes sur chaque table. Vos données vous appartiennent — pas à nous, pas aux annonceurs, pas à qui que ce soit d'autre." },
+  { q:'Ai-je besoin de connaissances techniques pour configurer ça ?',
+    a:"Si vous pouvez publier sur Instagram, vous pouvez utiliser Organized. La configuration prend moins de 10 minutes. On vous guidera à chaque étape." },
+  { q:'Et si je veux annuler ?',
+    a:"Pas de questions, pas d'emails de rétention, pas de pratiques obscures. Annulez à tout moment depuis votre tableau de bord en un clic. Vos données peuvent être exportées avant de partir." },
+]
+
 const SF_MSGS = [
   { id:1,  from:'client', text:'Hey! Are you free Saturday? 🙏',        delay:500  },
   { id:2,  from:'pro',    text:'Which Saturday — this one or next?',     delay:1400 },
@@ -473,12 +663,17 @@ export default function Landing() {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [openFaq, setOpenFaq] = useState(null)
+  const [lang, setLang] = useState('en')
   const [sfVisible, setSfVisible] = useState([])
   const [sfTyping, setSfTyping] = useState(null)
   const [sfStarted, setSfStarted] = useState(false)
   const sfRef = useRef(null)
   const sfEndRef = useRef(null)
   useReveal()
+
+  const t = COPY[lang]
+  const activePlans = lang === 'en' ? plans : plans_fr
+  const activeFaqs  = lang === 'en' ? faqs  : faqs_fr
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 60)
@@ -522,13 +717,18 @@ export default function Landing() {
       <nav className={`nav ${scrolled?'scrolled':''}`}>
         <div className="nav-logo" onClick={()=>navigate('/')}><span translate="no">Organized</span><span>.</span></div>
         <div className="nav-links">
-          <span className="nav-link" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>How it works</span>
-          <span className="nav-link" onClick={()=>document.getElementById('pricing')?.scrollIntoView({behavior:'smooth'})}>Pricing</span>
-          <span className="nav-link" onClick={()=>document.getElementById('faq')?.scrollIntoView({behavior:'smooth'})}>FAQ</span>
+          <span className="nav-link" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>{t.nav_how}</span>
+          <span className="nav-link" onClick={()=>document.getElementById('pricing')?.scrollIntoView({behavior:'smooth'})}>{t.nav_pricing}</span>
+          <span className="nav-link" onClick={()=>document.getElementById('faq')?.scrollIntoView({behavior:'smooth'})}>{t.nav_faq}</span>
         </div>
         <div className="nav-right">
-          <span className="nav-signin" onClick={()=>navigate('/auth')}>Sign in</span>
-          <button className="nav-cta" onClick={()=>navigate('/auth')}>Get started free</button>
+          <div className="lang-toggle">
+            {['EN','FR'].map(l=>(
+              <button key={l} className={`lang-btn${lang===l.toLowerCase()?' active':''}`} onClick={()=>setLang(l.toLowerCase())}>{l}</button>
+            ))}
+          </div>
+          <span className="nav-signin" onClick={()=>navigate('/auth')}>{t.nav_signin}</span>
+          <button className="nav-cta" onClick={()=>navigate('/auth')}>{t.nav_cta}</button>
         </div>
       </nav>
 
@@ -542,24 +742,27 @@ export default function Landing() {
         <div className="hero-inner">
           <div className="hero-label">
             <div className="hero-label-line"/>
-            <span className="hero-label-text">Built for service professionals</span>
+            <span className="hero-label-text">{t.hero_label}</span>
             <div className="hero-label-line"/>
           </div>
           <h1 className="hero-h1">
-            Every unanswered{'\u00A0'}<span translate="no">DM</span>{'\u00A0'}is<br/>a booking <em>you lost.</em><br/>
-            You're leaving money<br/>on the <em>table.</em>
+            {lang==='en' ? (
+              <>Every unanswered{'\u00A0'}<span translate="no">DM</span>{'\u00A0'}is<br/>a booking <em>you lost.</em><br/>You're leaving money<br/>on the <em>table.</em></>
+            ) : (
+              <>Chaque <span translate="no">DM</span> sans réponse<br/>est une réservation <em>perdue.</em><br/>Vous laissez de l'argent<br/>sur la <em>table.</em></>
+            )}
           </h1>
           <div className="hero-divider"/>
           <p className="hero-sub">
-            Let your clients book you directly —{' '}
-            <strong>no more back-and-forth{'\u00A0'}<span translate="no">DMs</span>,</strong>{' '}
-            no more confusion, no more missed opportunity.
+            {t.hero_sub_start}{' '}
+            <strong>{t.hero_sub_strong}</strong>{' '}
+            {t.hero_sub_end}
           </p>
           <div className="hero-actions">
-            <button className="btn-gold-lg" onClick={()=>navigate('/auth')}>Claim Your Spot — Free</button>
-            <button className="btn-ghost-lg" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>See how it works</button>
+            <button className="btn-gold-lg" onClick={()=>navigate('/auth')}>{t.hero_cta}</button>
+            <button className="btn-ghost-lg" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>{t.hero_see}</button>
           </div>
-          <p className="hero-note">Early access is open — limited spots · Free during beta · No credit card</p>
+          <p className="hero-note">{t.hero_note}</p>
         </div>
         <div className="scroll-hint"><div className="scroll-line"/></div>
       </section>
@@ -572,10 +775,10 @@ export default function Landing() {
 
           <div className="sf-heading" data-rv>
             <div className="sf-gold-line">
-              <span className="sec-tag-text">Sound familiar?</span>
+              <span className="sec-tag-text">{t.sf_tag}</span>
             </div>
-            <h2 className="sf-h2">This is how every booking <em>starts.</em></h2>
-            <p className="sf-sub">Back-and-forth. Every single time. Meanwhile the client loses patience — and you lose money.</p>
+            <h2 className="sf-h2">{t.sf_h2_s} <em>{t.sf_h2_em}</em></h2>
+            <p className="sf-sub">{t.sf_sub}</p>
           </div>
 
           {/* 3D Phone */}
@@ -614,8 +817,8 @@ export default function Landing() {
           </div>
 
           <div className="sf-punchline" data-rv>
-            <p className="sf-quote">"And that's just to confirm one appointment."</p>
-            <p className="sf-cta-hint">Stop managing bookings. <strong>Start taking them.</strong></p>
+            <p className="sf-quote">{t.sf_quote}</p>
+            <p className="sf-cta-hint">{t.sf_hint} <strong>{t.sf_hint_s}</strong></p>
           </div>
         </div>
       </div>
@@ -626,14 +829,14 @@ export default function Landing() {
           <div data-rv style={{textAlign:'center',marginBottom:'5rem'}}>
             <div className="sec-tag center muted" style={{justifyContent:'center',marginBottom:'1.25rem'}}>
               <div className="sec-tag-line" style={{background:'rgba(181,137,58,.5)'}}/>
-              <span className="sec-tag-text" style={{color:'rgba(181,137,58,.6)'}}>The professional we built this for</span>
+              <span className="sec-tag-text" style={{color:'rgba(181,137,58,.6)'}}>{t.lilas_tag}</span>
               <div className="sec-tag-line" style={{background:'rgba(181,137,58,.5)'}}/>
             </div>
             <h2 style={{fontFamily:'Playfair Display,serif',fontSize:'clamp(2.2rem,4vw,3.5rem)',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:'1rem'}}>
-              This is <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>your week.</em>
+              {t.lilas_h2_s} <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>{t.lilas_h2_em}</em>
             </h2>
             <p style={{fontSize:'.95rem',color:'rgba(255,255,255,.35)',fontWeight:300,lineHeight:1.8,maxWidth:'480px',margin:'0 auto'}}>
-              Talented. Fully booked — or so it seems. Here's what the reality actually looks like.
+              {t.lilas_sub}
             </p>
           </div>
 
@@ -641,10 +844,10 @@ export default function Landing() {
             {/* BEFORE */}
             <div data-rv>
               <div style={{display:'flex',alignItems:'center',gap:'.75rem',marginBottom:'1.5rem'}}>
-                <div style={{background:'rgba(239,68,68,.12)',color:'#f87171',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(239,68,68,.2)'}}>Before <span translate="no">Organized</span></div>
+                <div style={{background:'rgba(239,68,68,.12)',color:'#f87171',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(239,68,68,.2)'}}>{t.before_label}</div>
               </div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.35rem',color:'rgba(255,255,255,.55)',marginBottom:'1.75rem',fontStyle:'italic',lineHeight:1.35,maxWidth:'320px'}}>
-                "23 unread DMs. 3 missed bookings. And it's only Monday."
+                {t.before_q}
               </div>
               <div style={{background:'#fff',borderRadius:'36px',overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.5)',border:'1px solid rgba(255,255,255,.08)',maxWidth:'280px',margin:'0 auto'}}>
                 <div style={{height:'28px',background:'#fff',display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -710,9 +913,9 @@ export default function Landing() {
                 </div>
               </div>
               <div style={{marginTop:'1.75rem',display:'flex',flexDirection:'column',gap:'.65rem'}}>
-                {['Lost 3 bookings that week — clients went elsewhere','Spent 4 hrs/day managing messages','Missed a $220 booking — never saw the DM'].map((t,i)=>(
+                {t.before_b.map((item,i)=>(
                   <div key={i} style={{display:'flex',alignItems:'flex-start',gap:'.6rem',fontSize:'.8rem',color:'rgba(255,255,255,.3)'}}>
-                    <span style={{color:'#f87171',flexShrink:0,marginTop:'1px'}}>×</span>{t}
+                    <span style={{color:'#f87171',flexShrink:0,marginTop:'1px'}}>×</span>{item}
                   </div>
                 ))}
               </div>
@@ -721,10 +924,10 @@ export default function Landing() {
             {/* AFTER */}
             <div data-rv data-delay="150">
               <div style={{display:'flex',alignItems:'center',gap:'.75rem',marginBottom:'1.5rem'}}>
-                <div style={{background:'rgba(34,197,94,.1)',color:'#4ade80',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(34,197,94,.2)'}}>After <span translate="no">Organized</span></div>
+                <div style={{background:'rgba(34,197,94,.1)',color:'#4ade80',fontSize:'.66rem',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',padding:'.3rem .9rem',borderRadius:'12px',border:'1px solid rgba(34,197,94,.2)'}}>{t.after_label}</div>
               </div>
               <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.35rem',color:'rgba(255,255,255,.7)',marginBottom:'1.75rem',fontStyle:'italic',lineHeight:1.35,maxWidth:'320px'}}>
-                "Monday morning. 4 confirmed bookings. Phone still quiet."
+                {t.after_q}
               </div>
               <div style={{background:'#f8f6f2',borderRadius:'36px',overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.5)',border:'1px solid rgba(255,255,255,.08)',maxWidth:'280px',margin:'0 auto'}}>
                 <div style={{height:'28px',background:'#f8f6f2',display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -754,7 +957,7 @@ export default function Landing() {
                 ))}
                 <div style={{background:'rgba(181,137,58,.07)',padding:'.75rem .85rem',display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:'1px solid rgba(181,137,58,.12)'}}>
                   <div>
-                    <div style={{fontSize:'.58rem',color:'#8c8882',marginBottom:'.1rem'}}>Revenue this week</div>
+                    <div style={{fontSize:'.58rem',color:'#8c8882',marginBottom:'.1rem'}}>{lang==='fr'?'Revenus cette semaine':'Revenue this week'}</div>
                     <div style={{fontFamily:'Playfair Display,serif',fontSize:'1.25rem',color:'#b5893a',fontWeight:700}}>$451</div>
                   </div>
                   <div style={{fontSize:'.6rem',color:'#4ade80',background:'rgba(34,197,94,.1)',padding:'.25rem .6rem',borderRadius:'10px',fontWeight:500}}>↑ 23%</div>
@@ -766,9 +969,9 @@ export default function Landing() {
                 </div>
               </div>
               <div style={{marginTop:'1.75rem',display:'flex',flexDirection:'column',gap:'.65rem'}}>
-                {['Zero unanswered messages — clients book themselves','4 hrs/day freed — spent doing what she loves','Never missed a booking again'].map((t,i)=>(
+                {t.after_b.map((item,i)=>(
                   <div key={i} style={{display:'flex',alignItems:'flex-start',gap:'.6rem',fontSize:'.8rem',color:'rgba(255,255,255,.5)'}}>
-                    <span style={{color:'#4ade80',flexShrink:0,marginTop:'1px'}}>✓</span>{t}
+                    <span style={{color:'#4ade80',flexShrink:0,marginTop:'1px'}}>✓</span>{item}
                   </div>
                 ))}
               </div>
@@ -777,9 +980,9 @@ export default function Landing() {
 
           <div data-rv="fade" className="lilas-quote" style={{textAlign:'center',marginTop:'4rem',padding:'2.5rem',background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.06)',borderRadius:'16px',maxWidth:'620px',margin:'4rem auto 0'}}>
             <p style={{fontSize:'1rem',fontFamily:'Playfair Display,serif',fontStyle:'italic',color:'rgba(255,255,255,.5)',marginBottom:'.75rem',lineHeight:1.5}}>
-              "This is the week thousands of service professionals are living right now. We built <span translate="no">Organized</span> to end it."
+              {t.lilas_q}
             </p>
-            <div className="lilas-attr" style={{fontSize:'.75rem',color:'rgba(255,255,255,.2)',letterSpacing:'.04em'}}>— The <span translate="no">Organized.</span> team</div>
+            <div className="lilas-attr" style={{fontSize:'.75rem',color:'rgba(255,255,255,.2)',letterSpacing:'.04em'}}>{t.lilas_attr}</div>
           </div>
         </div>
       </div>
