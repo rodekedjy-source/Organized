@@ -508,7 +508,7 @@ export default function Landing() {
   }, [sfVisible, sfTyping])
 
   return (
-    <div>
+    <div translate="no">
       <style>{css}</style>
 
       {/* NAV */}
@@ -539,13 +539,13 @@ export default function Landing() {
             <div className="hero-label-line"/>
           </div>
           <h1 className="hero-h1">
-            Every unanswered DM is<br/>a booking <em>you lost.</em><br/>
+            Every unanswered <span translate="no">DM</span> is<br/>a booking <em>you lost.</em><br/>
             You're leaving money<br/>on the <em>table.</em>
           </h1>
           <div className="hero-divider"/>
           <p className="hero-sub">
             Let your clients book you directly —{' '}
-            <strong>no more back-and-forth DMs,</strong>{' '}
+            <strong>no more back-and-forth <span translate="no">DMs</span>,</strong>{' '}
             no more confusion, no more missed opportunity.
           </p>
           <div className="hero-actions">
@@ -846,7 +846,7 @@ export default function Landing() {
             <h2 style={{fontFamily:'Playfair Display,serif',fontSize:'clamp(2.2rem,3.5vw,3rem)',fontWeight:700,color:'var(--ink)',lineHeight:1.1,marginBottom:'1rem'}}>
               Your business. <em style={{fontStyle:'italic',fontWeight:400,color:'var(--gold)'}}>At a glance.</em>
             </h2>
-            <p style={{fontSize:'.95rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.85,maxWidth:'460px',margin:'0 auto'}}>Every booking, every sale, every client — organized the moment it happens. No spreadsheets. No missed DMs. No confusion.</p>
+            <p style={{fontSize:'.95rem',color:'var(--ink-3)',fontWeight:300,lineHeight:1.85,maxWidth:'460px',margin:'0 auto'}}>Every booking, every sale, every client — organized the moment it happens. No spreadsheets. No missed <span translate="no">DMs</span>. No confusion.</p>
           </div>
 
           {/* Phone + floating chips */}
@@ -1268,7 +1268,7 @@ export default function Landing() {
           <div className="cta-eyebrow"><div className="cta-line"/><span className="cta-label">The decision</span><div className="cta-line"/></div>
           <h2 className="cta-h2">Your craft is <em>exceptional.</em><br/>Your system should be too.</h2>
           <p className="cta-sub">
-            Stop running your business from a DM inbox. Fifteen beta spots. Free access. Honest feedback in return. That's the deal.
+            Stop running your business from a <span translate="no">DM</span> inbox. Fifteen beta spots. Free access. Honest feedback in return. That's the deal.
           </p>
           <div className="cta-actions">
             <button className="btn-gold-lg" onClick={()=>navigate('/auth')} style={{fontSize:'1rem',padding:'1.1rem 2.75rem'}}>Claim your beta spot — free</button>
