@@ -2245,8 +2245,8 @@ function SettingsLanguageForm({ ownerData, toast, refetch, lang='en' }) {
   )
 }
 
-// ── CLIENT PAGE PREVIEW (unchanged) ──────────────────────────────────────────
-function ClientPage({ workspace }) {
+// ── CLIENT PAGE — used both for toggle preview and public page ─────────────────
+function ClientPage({ workspace, onSwitchToDash }) {
   const [tab,setTab]=useState('book')
   const [services,setServices]=useState([])
   const [products,setProducts]=useState([])
@@ -2263,31 +2263,152 @@ function ClientPage({ workspace }) {
   const initial=workspace?.name?.charAt(0)?.toUpperCase()||'?'
   const clientUrl=workspace?.slug?`https://beorganized.io/${workspace.slug}`:null
   return (
-    <div style={{background:'#fff',minHeight:'100vh'}}>
-      <div className="cp-topbar">
-        <div className="cp-logo">{workspace?.name||'Your Studio'}<span style={{color:'var(--gold)'}}>.</span></div>
-        <div style={{display:'flex',gap:'.75rem'}}>
-          {workspace?.instagram&&<button className="cp-ghost" onClick={()=>window.open(`https://instagram.com/${workspace.instagram.replace('@','')}`)}>Instagram</button>}
-          {clientUrl&&<button className="cp-ghost" onClick={()=>{navigator.clipboard?.writeText(clientUrl)}}>Copier lien</button>}
+    <div style={{background:'#faf8f5',minHeight:'100vh'}}>
+      {/* Hero — dark gradient, studio name floats here like the real page */}
+      <div style={{background:'linear-gradient(160deg,#1a1814 0%,#2d2920 100%)',position:'relative'}}>
+        {/* Topbar blended into hero — exactly like real client page */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'.85rem 1.25rem 0'}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',color:'#fff',fontWeight:500,letterSpacing:'-.01em'}}>
+            {workspace?.name||'Your Studio'}<span style={{color:'var(--gold)'}}>.</span>
+          </div>
+          <div style={{display:'flex',gap:'.5rem',alignItems:'center'}}>
+            {workspace?.instagram&&(
+              <button className="cp-ghost" style={{color:'rgba(255,255,255,.6)',borderColor:'rgba(255,255,255,.15)',background:'rgba(255,255,255,.05)'}}
+                onClick={()=>window.open(`https://instagram.com/${workspace.instagram.replace('@','')}`)}>Instagram</button>
+            )}
+            {/* Toggle: only shown in preview mode */}
+            {onSwitchToDash&&(
+              <div style={{display:'flex',background:'rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.15)',borderRadius:8,overflow:'hidden'}}>
+                <button onClick={onSwitchToDash}
+                  style={{padding:'.3rem .7rem',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'.72rem',fontWeight:500,background:'transparent',color:'rgba(255,255,255,.55)'}}>
+                  Dash
+                </button>
+                <button style={{padding:'.3rem .7rem',border:'none',fontFamily:'inherit',fontSize:'.72rem',fontWeight:700,background:'rgba(255,255,255,.15)',color:'#fff',cursor:'default'}}>
+                  Client
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Hero content */}
+        <div style={{padding:'2rem 1.5rem 2.5rem',textAlign:'center'}}>
+          <div style={{width:72,height:72,borderRadius:'50%',border:'1.5px solid rgba(197,169,106,.5)',background:'rgba(197,169,106,.12)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',color:'var(--gold)',margin:'0 auto .9rem',fontWeight:500}}>
+            {initial}
+          </div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.65rem',color:'#fff',fontWeight:400,marginBottom:'.4rem'}}>{workspace?.name||'Your Studio'}</div>
+          {workspace?.tagline&&<div style={{fontSize:'.85rem',color:'rgba(255,255,255,.5)',lineHeight:1.6,marginBottom:'.25rem'}}>{workspace.tagline}</div>}
+          {workspace?.location&&<div style={{fontSize:'.8rem',color:'rgba(255,255,255,.4)',marginTop:'.2rem'}}>&#128205; {workspace.location}</div>}
+          {(services.length>0||products.length>0||offerings.length>0)&&(
+            <div style={{display:'flex',justifyContent:'center',gap:'2rem',marginTop:'1.5rem',paddingTop:'1.25rem',borderTop:'1px solid rgba(255,255,255,.08)'}}>
+              {[[services.length,'SERVICES'],[products.length,'PRODUCTS'],[offerings.length,'FORMATIONS']].map(([v,l],i)=>(
+                <div key={i} style={{textAlign:'center'}}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',color:'#fff',fontWeight:400}}>{v}</div>
+                  <div style={{fontSize:'.6rem',color:'rgba(255,255,255,.35)',textTransform:'uppercase',letterSpacing:'.1em',marginTop:2}}>{l}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      <div className="cp-hero">
-        <div className="cp-av">{initial}</div>
-        <div className="cp-name">{workspace?.name||'Your Studio'}</div>
-        <div className="cp-bio">{workspace?.tagline||'Add your tagline in Settings'}</div>
-        {workspace?.location&&<div className="cp-bio" style={{marginTop:'.25rem'}}>&#128205; {workspace.location}</div>}
-        <div className="cp-stats">
-          {[[`${services.length}`,'Services'],[`${products.length}`,'Products'],[`${offerings.length}`,'Formations']].map(([v,l],i)=>(<div key={i} style={{textAlign:'center'}}><div className="cp-sval">{v}</div><div className="cp-slbl">{l}</div></div>))}
+      {/* Nav tabs */}
+      <div style={{display:'flex',background:'#fff',borderBottom:'1px solid #ece9e4',position:'sticky',top:0,zIndex:10}}>
+        {[['book','Book a service'],['shop','Shop'],['learn','Formations']].map(([k,l])=>(
+          <div key={k} onClick={()=>setTab(k)}
+            style={{flex:1,textAlign:'center',padding:'.85rem .5rem',fontSize:'.82rem',fontWeight:tab===k?700:400,color:tab===k?'#1a1814':'#7a7774',cursor:'pointer',borderBottom:`2px solid ${tab===k?'var(--gold)':'transparent'}`,transition:'all .15s'}}>
+            {l}
+          </div>
+        ))}
+      </div>
+      {/* Body */}
+      <div style={{padding:'1.5rem 1.25rem',minHeight:300}}>
+        {tab==='book'&&(
+          <>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',color:'#1a1814',marginBottom:'1rem'}}>Services</div>
+            {services.length===0
+              ?<div style={{color:'#7a7774',fontSize:'.85rem'}}>No services added yet.</div>
+              :<div style={{display:'flex',flexDirection:'column',gap:'.65rem'}}>
+                {services.map((s,i)=>(
+                  <div key={i} onClick={()=>setModal(s)}
+                    style={{display:'flex',alignItems:'center',gap:'1rem',background:'#fff',border:'1px solid #ece9e4',borderRadius:14,padding:'1rem 1.1rem',cursor:'pointer',transition:'box-shadow .15s'}}
+                    onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'}
+                    onMouseLeave={e=>e.currentTarget.style.boxShadow='none'}>
+                    <div style={{width:3,height:36,background:'linear-gradient(to bottom,var(--gold),rgba(197,169,106,.35))',borderRadius:2,flexShrink:0}}/>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:600,fontSize:'.9rem',color:'#1a1814'}}>{s.name}</div>
+                      {s.duration_min&&<div style={{fontSize:'.72rem',color:'#7a7774',marginTop:2}}>{s.duration_min} min</div>}
+                    </div>
+                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',color:'#1a1814',flexShrink:0}}>{fmtFree(s.price)}</div>
+                    <button style={{background:'#1a1814',color:'#fff',border:'none',borderRadius:9,padding:'.45rem .95rem',fontSize:'.78rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit',flexShrink:0}}>Book</button>
+                  </div>
+                ))}
+              </div>
+            }
+          </>
+        )}
+        {tab==='shop'&&(
+          <>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',color:'#1a1814',marginBottom:'1rem'}}>Products</div>
+            {products.length===0
+              ?<div style={{color:'#7a7774',fontSize:'.85rem'}}>No products added yet.</div>
+              :<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem'}}>
+                {products.map(p=>(
+                  <div key={p.id} style={{background:'#fff',border:'1px solid #ece9e4',borderRadius:12,overflow:'hidden'}}>
+                    <div style={{height:120,background:'#f0ece4',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
+                      {(p.images||[])[0]?<img src={p.images[0]} alt={p.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                        :<span style={{fontSize:'.65rem',color:'#c8c2b8',fontWeight:600,letterSpacing:'.05em'}}>PRODUCT</span>}
+                    </div>
+                    <div style={{padding:'.85rem'}}>
+                      <div style={{fontWeight:600,fontSize:'.85rem',color:'#1a1814',marginBottom:'.3rem'}}>{p.name}</div>
+                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'.9rem',color:'#1a1814',marginBottom:'.65rem'}}>{fmtRev(p.price)}</div>
+                      <button style={{width:'100%',background:'#1a1814',color:'#fff',border:'none',borderRadius:8,padding:'.45rem',fontSize:'.78rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Add to cart</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            }
+          </>
+        )}
+        {tab==='learn'&&(
+          <>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',color:'#1a1814',marginBottom:'1rem'}}>Formations</div>
+            {offerings.length===0
+              ?<div style={{color:'#7a7774',fontSize:'.85rem'}}>No formations added yet.</div>
+              :offerings.map((f,i)=>(
+                <div key={f.id} style={{display:'flex',alignItems:'center',gap:'1rem',background:'#fff',border:'1px solid #ece9e4',borderRadius:14,padding:'1rem 1.1rem',marginBottom:'.65rem'}}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',color:'#c8c2b8',width:28,flexShrink:0}}>0{i+1}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:600,fontSize:'.88rem',color:'#1a1814',marginBottom:'.2rem'}}>{f.title}</div>
+                    {f.description&&<div style={{fontSize:'.75rem',color:'#7a7774',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.description}</div>}
+                    {f.duration_label&&<div style={{marginTop:'.35rem',display:'inline-flex',background:'#f5f3ef',border:'1px solid #e8e4de',borderRadius:20,padding:'.15rem .6rem',fontSize:'.68rem',color:'#7a7774'}}>{f.duration_label}</div>}
+                  </div>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'.95rem',color:'#1a1814',flexShrink:0}}>{fmtRev(f.price)}</div>
+                </div>
+              ))
+            }
+          </>
+        )}
+      </div>
+      {/* Footer */}
+      <div style={{textAlign:'center',padding:'2rem 1.25rem',fontSize:'.75rem',color:'#b0aba4',background:'#1a1814',marginTop:'2rem'}}>
+        <p>Powered by <strong style={{color:'var(--gold)'}}>Organized.</strong> — beorganized.io</p>
+      </div>
+      {/* Booking modal */}
+      {modal&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.4)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={()=>setModal(null)}>
+          <div style={{background:'#fff',borderRadius:'18px 18px 0 0',width:'100%',maxWidth:480,padding:'1.75rem',display:'flex',flexDirection:'column',gap:'1rem',maxHeight:'90vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',color:'#1a1814'}}>Book — {modal.name}</div>
+            <div style={{fontSize:'.8rem',color:'#7a7774'}}>Fill in your details and we will confirm your appointment.</div>
+            <div className="field"><label>Full name</label><input placeholder="e.g. Amara Diallo"/></div>
+            <div className="field"><label>Phone number</label><input placeholder="+1 (514) ..."/></div>
+            <div className="field"><label>Preferred date</label><input type="date"/></div>
+            <div className="field"><label>Notes (optional)</label><input placeholder="Hair length, allergies..."/></div>
+            <div style={{display:'flex',gap:'.65rem',paddingTop:'.25rem'}}>
+              <button className="btn btn-secondary" style={{flex:1,justifyContent:'center'}} onClick={()=>setModal(null)}>Cancel</button>
+              <button className="btn btn-primary" style={{flex:1,justifyContent:'center'}} onClick={()=>setModal(null)}>Send request</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="cp-nav">{[['book','Book a service'],['shop','Shop'],['learn','Formations']].map(([k,l])=>(<div key={k} className={`cp-tab${tab===k?' active':''}`} onClick={()=>setTab(k)}>{l}</div>))}</div>
-      <div className="cp-body">
-        {tab==='book'&&<><div className="cp-stitle">Services</div>{services.length===0?<div style={{color:'#7a7774',fontSize:'.85rem'}}>No services added yet.</div>:<div className="svc-list">{services.map((s,i)=>(<div key={i} className="svc-row" onClick={()=>setModal(s)}><div className="svc-bar"/><div className="svc-info"><div className="svc-name">{s.name}</div>{s.duration_min&&<div className="svc-dur">{s.duration_min} min</div>}</div><div className="svc-price">{fmtFree(s.price)}</div><button className="bk-btn">Book</button></div>))}</div>}</>}
-        {tab==='shop'&&<><div className="cp-stitle">Hair Products</div>{products.length===0?<div style={{color:'#7a7774',fontSize:'.85rem'}}>No products added yet.</div>:<div className="shop-grid">{products.map(p=>(<div key={p.id} className="shop-card"><div className="shop-img">PRODUCT</div><div className="shop-body"><div className="shop-name">{p.name}</div><div className="shop-price">{fmtRev(p.price)}</div><button className="shop-btn">Add to cart</button></div></div>))}</div>}</>}
-        {tab==='learn'&&<><div className="cp-stitle">Formations</div>{offerings.length===0?<div style={{color:'#7a7774',fontSize:'.85rem'}}>No formations added yet.</div>:offerings.map((f,i)=>(<div key={f.id} className="fm-card"><div className="fm-idx">0{i+1}</div><div className="fm-info"><div className="fm-name">{f.title}</div><div className="fm-desc">{f.description}</div>{f.duration_label&&<div className="fm-tags"><span>{f.duration_label}</span></div>}</div><div className="fm-price">{fmtRev(f.price)}</div></div>))}</>}
-      </div>
-      <div className="cp-footer"><p>Powered by <strong>Organized.</strong> &#8212; beorganized.io</p></div>
-      {modal&&(<div className="overlay" onClick={()=>setModal(null)}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-title">Book &#8212; {modal.name}</div><div className="modal-sub">Fill in your details and we'll confirm your appointment.</div><div className="field"><label>Full name</label><input placeholder="e.g. Amara Diallo"/></div><div className="field"><label>Phone number</label><input placeholder="+1 (514) ..."/></div><div className="field"><label>Preferred date</label><input type="date"/></div><div className="field"><label>Notes (optional)</label><input placeholder="Hair length, allergies..."/></div><div className="modal-actions"><button className="btn btn-secondary" onClick={()=>setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={()=>setModal(null)}>Send request</button></div></div></div>)}
+      )}
     </div>
   )
 }
@@ -2376,20 +2497,9 @@ export default function Dashboard() {
   const initials=(()=>{const n=ownerData?.full_name||firstName(workspace,session)||'';const parts=n.trim().split(' ');return parts.length>1?parts[0][0]+parts[1][0]:parts[0]?.[0]||'?'})()
 
   if(clientView) return (
-    <div className="app-wrap">
+    <div>
       <style>{css}</style>
-      {/* Same topbar — toggle switches back to Dash */}
-      <div className="topbar">
-        <div style={{display:'flex',alignItems:'center',gap:'.6rem'}}>
-          <div className="brand">Organized<span className="brand-dot">.</span></div>
-        </div>
-        <div className="view-toggle">
-          <button className="vt-btn" onClick={()=>setClientView(false)}>Dash</button>
-          <button className="vt-btn active">Client</button>
-        </div>
-        <div className="av-btn" onClick={()=>setClientView(false)}>{initials}</div>
-      </div>
-      <ClientPage workspace={workspace}/>
+      <ClientPage workspace={workspace} onSwitchToDash={()=>setClientView(false)}/>
     </div>
   )
 
