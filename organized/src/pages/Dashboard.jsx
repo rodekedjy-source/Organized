@@ -390,7 +390,7 @@ function MessageModal({ appt, onClose, workspace }) {
 }
 
 // ── IMAGE EDITOR MODAL (FIX 9) ────────────────────────────────────────────────
-function ImageEditorModal({ imageUrl, workspaceId, onSave, onClose, toast }) {
+function ImageEditorModal({ imageUrl, workspaceId, productName='', onSave, onClose, toast }) {
   useScrollLock()
   const canvasRef = useRef(null)
   const imgRef    = useRef(null)
@@ -1480,7 +1480,7 @@ function Services({ workspace, toast, lang='en' }) {
 }
 
 // ── AI ENHANCE MODAL ──────────────────────────────────────────────────────────
-function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, toast }) {
+function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, toast, productName='' }) {
   const [style,setStyle]=useState('studio')
   const [phase,setPhase]=useState('pick')
   const [results,setResults]=useState([])
@@ -1490,10 +1490,11 @@ function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, to
   async function run(){
     setPhase('loading');setLoadingMsg('AI is crafting your photos...')
     try{
+      const desc=productName?`${productName} beauty product`:'professional hair and beauty product'
       const res=await fetch(EDGE,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({image_url:imageUrl,style,product_description:'professional hair and beauty product'})
+        body:JSON.stringify({image_url:imageUrl,style,product_description:desc})
       })
       const data=await res.json()
       if(data?.error) throw new Error(data.error)
@@ -1698,7 +1699,7 @@ function Products({ workspace, toast }) {
         </form>
       </div>
       {editorTarget&&(
-        <ImageEditorModal imageUrl={editorTarget.url} workspaceId={workspace.id}
+        <ImageEditorModal imageUrl={editorTarget.url} workspaceId={workspace.id} productName={form.name}
           onSave={newUrl=>{setPendingImgs(prev=>prev.map((img,i)=>i===editorTarget.idx?{...img,url:newUrl,preview:newUrl}:img));setEditorTarget(null);toast('Photo saved.')}}
           onClose={()=>setEditorTarget(null)} toast={toast}/>
       )}
@@ -1876,7 +1877,7 @@ function ProductEditModal({ product, workspaceId, onClose, onSaved, onDeleted, t
         )}
       </div>
       {editorTarget&&(
-        <ImageEditorModal imageUrl={editorTarget.url} workspaceId={workspaceId}
+        <ImageEditorModal imageUrl={editorTarget.url} workspaceId={workspaceId} productName={product.name}
           onSave={newUrl=>{
             if(editorTarget.type==='existing') setExistingImgs(prev=>prev.map((img,i)=>i===editorTarget.idx?{url:newUrl,preview:newUrl}:img))
             else setNewImgs(prev=>prev.map((img,i)=>i===editorTarget.idx?{...img,url:newUrl,preview:newUrl}:img))
