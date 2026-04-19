@@ -1486,28 +1486,19 @@ function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, to
   const [results,setResults]=useState([])
   const [loadingMsg,setLoadingMsg]=useState('')
   const EDGE='https://bwfpioxvfqwnwzkvtebg.supabase.co/functions/v1/enhance-product-image'
-  async function getToken(){const{data}=await supabase.auth.getSession();return data?.session?.access_token}
-  async function call(body,token){const res=await fetch(EDGE,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(body)});return res.json()}
-  async function waitFor(reqId,token){while(true){await new Promise(r=>setTimeout(r,3500));const s=await call({action:'status',request_id:reqId},token);if(s.status==='COMPLETED'){const r=await call({action:'result',request_id:reqId},token);return r.images?.[0]?.url}if(s.status==='FAILED') throw new Error('Generation failed')}}
+
   async function run(){
-    setPhase('loading');setLoadingMsg('Preparing image...')
+    setPhase('loading');setLoadingMsg('AI is crafting your photos...')
     try{
-      const token=await getToken()
-      if(!token) throw new Error('Not authenticated')
-      setLoadingMsg('AI is crafting your photos...')
-      const res=await call({action:'submit',image_url:imageUrl,style,product_description:'professional hair and beauty product'},token)
-      // Handle multiple possible response shapes from the edge function
-      if(res?.error) throw new Error(res.error)
-      // Direct URL(s) returned
-      if(res?.urls && Array.isArray(res.urls)){ setResults(res.urls.filter(Boolean)); setPhase('results'); return }
-      if(res?.url){ setResults([res.url]); setPhase('results'); return }
-      if(res?.image_url){ setResults([res.image_url]); setPhase('results'); return }
-      // Async request_ids pattern
-      const ids = res?.request_ids || (res?.request_id ? [res.request_id] : null)
-      if(!ids || !ids.length) throw new Error('No request IDs returned from enhancement service.')
-      setLoadingMsg('Finalising your photos…')
-      const urls=await Promise.all(ids.map(id=>waitFor(id,token)))
-      setResults(urls.filter(Boolean)); setPhase('results')
+      const res=await fetch(EDGE,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({image_url:imageUrl,style,product_description:'professional hair and beauty product'})
+      })
+      const data=await res.json()
+      if(data?.error) throw new Error(data.error)
+      if(data?.urls && data.urls.length>0){ setResults(data.urls.filter(Boolean)); setPhase('results'); return }
+      throw new Error('No images returned.')
     }catch(e){toast('Enhancement unavailable — '+e.message);setPhase('pick')}
   }
   async function pick(url){
