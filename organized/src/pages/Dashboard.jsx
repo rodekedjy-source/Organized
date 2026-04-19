@@ -392,99 +392,195 @@ function MessageModal({ appt, onClose, workspace }) {
 // ── IMAGE EDITOR MODAL (FIX 9) ────────────────────────────────────────────────
 function ImageEditorModal({ imageUrl, workspaceId, onSave, onClose, toast }) {
   useScrollLock()
-  const canvasRef=useRef(null)
-  const imgRef=useRef(null)
-  const [rotation,setRotation]=useState(0)
-  const [flipH,setFlipH]=useState(false)
-  const [loaded,setLoaded]=useState(false)
-  const [saving,setSaving]=useState(false)
-  const [showEnhance,setShowEnhance]=useState(false)
+  const canvasRef = useRef(null)
+  const imgRef    = useRef(null)
+  const [rotation, setRotation] = useState(0)
+  const [flipH,    setFlipH]    = useState(false)
+  const [loaded,   setLoaded]   = useState(false)
+  const [saving,   setSaving]   = useState(false)
+  const [mode,     setMode]     = useState('adjust') // 'adjust' | 'crop'
+  const [showEnhance, setShowEnhance] = useState(false)
+  const [cropAspect, setCropAspect]   = useState(null)
+  const [crop, setCrop] = useState({ x:0, y:0, w:1, h:1 })
 
   useEffect(()=>{
     fetch(imageUrl).then(r=>r.blob()).then(blob=>{
-      const url=URL.createObjectURL(blob)
-      const img=new Image()
-      img.onload=()=>{imgRef.current=img;setLoaded(true)}
-      img.onerror=()=>toast('Could not load image for editing.')
-      img.src=url
-    }).catch(()=>toast('Could not load image for editing.'))
+      const blobUrl = URL.createObjectURL(blob)
+      const img = new Image()
+      img.onload = () => { imgRef.current = img; setLoaded(true) }
+      img.onerror = () => toast('Could not load image.')
+      img.src = blobUrl
+    }).catch(()=>toast('Could not load image.'))
   },[imageUrl])
 
-  useEffect(()=>{if(loaded)draw()},[loaded,rotation,flipH])
+  useEffect(()=>{ if(loaded) draw() },[loaded,rotation,flipH,crop,mode])
 
   function draw(){
-    const canvas=canvasRef.current,img=imgRef.current
+    const canvas=canvasRef.current, img=imgRef.current
     if(!canvas||!img) return
-    const rad=(rotation*Math.PI)/180
-    const swapped=rotation===90||rotation===270
-    const w=swapped?img.height:img.width,h=swapped?img.width:img.height
-    canvas.width=w;canvas.height=h
+    const rad     = (rotation*Math.PI)/180
+    const swapped = rotation===90||rotation===270
+    const srcW    = swapped ? img.height : img.width
+    const srcH    = swapped ? img.width  : img.height
+    canvas.width=srcW; canvas.height=srcH
     const ctx=canvas.getContext('2d')
-    ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(w/2,h/2);ctx.rotate(rad)
-    if(flipH)ctx.scale(-1,1)
-    ctx.drawImage(img,-img.width/2,-img.height/2);ctx.restore()
+    ctx.clearRect(0,0,srcW,srcH)
+    ctx.save(); ctx.translate(srcW/2,srcH/2); ctx.rotate(rad)
+    if(flipH) ctx.scale(-1,1)
+    ctx.drawImage(img,-img.width/2,-img.height/2)
+    ctx.restore()
+    if(mode==='crop'){
+      const cx=crop.x*srcW, cy=crop.y*srcH, cw=crop.w*srcW, ch=crop.h*srcH
+      ctx.fillStyle='rgba(0,0,0,.55)'
+      ctx.fillRect(0,0,srcW,cy); ctx.fillRect(0,cy+ch,srcW,srcH-(cy+ch))
+      ctx.fillRect(0,cy,cx,ch); ctx.fillRect(cx+cw,cy,srcW-(cx+cw),ch)
+      ctx.strokeStyle='rgba(197,169,106,.85)'; ctx.lineWidth=2
+      ctx.strokeRect(cx,cy,cw,ch)
+      const hs=14
+      ;[[cx,cy],[cx+cw-hs,cy],[cx,cy+ch-hs],[cx+cw-hs,cy+ch-hs]].forEach(([hx,hy])=>{
+        ctx.fillStyle='rgba(197,169,106,.95)'; ctx.fillRect(hx,hy,hs,hs)
+      })
+    }
   }
-  function rotate(deg){setRotation(r=>(r+deg+360)%360)}
+
+  function rotate(deg){ setRotation(r=>(r+deg+360)%360) }
+
+  function applyAspect(a){
+    setCropAspect(a)
+    if(a===null){ setCrop({x:0,y:0,w:1,h:1}); return }
+    const canvas=canvasRef.current; if(!canvas) return
+    const cw=canvas.width, ch=canvas.height
+    let rw=1, rh=1
+    if(a===1){ const s=Math.min(cw,ch); rw=s/cw; rh=s/ch }
+    else if(a===0.75){ rw=Math.min(1,ch*0.75/cw); rh=Math.min(1,cw/(ch*0.75)) }
+    else if(a===1.333){ rh=Math.min(1,cw*0.75/ch); rw=Math.min(1,ch*1.333/cw) }
+    setCrop({x:(1-rw)/2, y:(1-rh)/2, w:rw, h:rh})
+  }
+
   async function save(){
-    const canvas=canvasRef.current
-    if(!canvas){onSave(imageUrl);onClose();return}
+    const canvas=canvasRef.current, img=imgRef.current
+    if(!canvas||!img){ onSave(imageUrl); onClose(); return }
     setSaving(true)
-    canvas.toBlob(async blob=>{
-      if(!blob){onSave(imageUrl);onClose();setSaving(false);return}
+    const rad     = (rotation*Math.PI)/180
+    const swapped = rotation===90||rotation===270
+    const srcW    = swapped ? img.height : img.width
+    const srcH    = swapped ? img.width  : img.height
+    // Build full rotated image in temp canvas
+    const tmp=document.createElement('canvas'); tmp.width=srcW; tmp.height=srcH
+    const tctx=tmp.getContext('2d')
+    tctx.save(); tctx.translate(srcW/2,srcH/2); tctx.rotate(rad)
+    if(flipH) tctx.scale(-1,1)
+    tctx.drawImage(img,-img.width/2,-img.height/2); tctx.restore()
+    // Apply crop
+    const cx=Math.round(crop.x*srcW), cy=Math.round(crop.y*srcH)
+    const cw=Math.max(1,Math.round(crop.w*srcW)), ch=Math.max(1,Math.round(crop.h*srcH))
+    const final=document.createElement('canvas'); final.width=cw; final.height=ch
+    final.getContext('2d').drawImage(tmp,cx,cy,cw,ch,0,0,cw,ch)
+    final.toBlob(async blob=>{
+      if(!blob){ onSave(imageUrl); onClose(); setSaving(false); return }
       const path=`${workspaceId}/edited-${Date.now()}.jpg`
       const{error}=await supabase.storage.from('product-images').upload(path,blob,{upsert:true,contentType:'image/jpeg'})
-      if(error){toast('Could not save.');onSave(imageUrl);onClose();setSaving(false);return}
+      if(error){ toast('Could not save.'); onSave(imageUrl); onClose(); setSaving(false); return }
       const{data:ud}=supabase.storage.from('product-images').getPublicUrl(path)
-      onSave(ud.publicUrl||imageUrl);setSaving(false);onClose()
+      onSave(ud.publicUrl||imageUrl); setSaving(false); onClose()
     },'image/jpeg',0.92)
   }
+
+  const tabBtn = (active) => ({
+    background: active ? 'rgba(197,169,106,.15)' : 'rgba(255,255,255,.06)',
+    border: `1px solid ${active ? 'rgba(197,169,106,.4)' : 'rgba(255,255,255,.08)'}`,
+    color: active ? 'var(--gold)' : 'rgba(255,255,255,.5)',
+    borderRadius: 8, padding: '.35rem .85rem', cursor: 'pointer',
+    fontFamily: 'inherit', fontSize: '.72rem', fontWeight: 600,
+    letterSpacing: '.04em', transition: 'all .15s'
+  })
+  const ctrlBtn = () => ({
+    background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)',
+    color: 'rgba(255,255,255,.75)', borderRadius: 12, width: 68, height: 64,
+    cursor: 'pointer', display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'background .15s'
+  })
+
   return (
-    <div style={{position:'fixed',inset:0,background:'#0a0908',zIndex:500,display:'flex',flexDirection:'column'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'.85rem 1.25rem',borderBottom:'1px solid rgba(255,255,255,.08)'}}>
-        <button onClick={onClose} style={{background:'rgba(255,255,255,.1)',border:'none',color:'#fff',borderRadius:8,padding:'.45rem .9rem',cursor:'pointer',fontFamily:'inherit',fontSize:'.82rem'}}>Cancel</button>
-        <div style={{color:'rgba(255,255,255,.45)',fontSize:'.72rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'.1em'}}>Edit photo</div>
-        <button onClick={save} disabled={saving||!loaded} style={{background:'var(--gold)',border:'none',color:'#fff',borderRadius:8,padding:'.45rem 1rem',cursor:'pointer',fontFamily:'inherit',fontSize:'.82rem',fontWeight:600,opacity:saving||!loaded?.5:1}}>
-          {saving?'Saving…':'Done'}
+    <div style={{position:'fixed',inset:0,background:'#080706',zIndex:500,display:'flex',flexDirection:'column'}}>
+      {/* Header */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'.85rem 1.25rem',borderBottom:'1px solid rgba(255,255,255,.06)',flexShrink:0}}>
+        <button onClick={onClose} style={tabBtn(false)}>Cancel</button>
+        <div style={{display:'flex',gap:'.35rem'}}>
+          <button onClick={()=>setMode('adjust')} style={tabBtn(mode==='adjust')}>Adjust</button>
+          <button onClick={()=>setMode('crop')}   style={tabBtn(mode==='crop')}>Crop</button>
+        </div>
+        <button onClick={save} disabled={saving||!loaded}
+          style={{background:saving||!loaded?'rgba(197,169,106,.3)':'var(--gold)',border:'none',color:'#1a1814',borderRadius:9,padding:'.45rem 1.1rem',cursor:'pointer',fontFamily:'inherit',fontSize:'.8rem',fontWeight:700,transition:'all .15s'}}>
+          {saving ? 'Saving…' : 'Done'}
         </button>
       </div>
-      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'1.5rem',overflow:'hidden'}}>
-        {!loaded&&<div style={{color:'rgba(255,255,255,.35)',fontSize:'.82rem'}}>Loading…</div>}
-        <canvas ref={canvasRef} style={{maxWidth:'100%',maxHeight:'100%',display:loaded?'block':'none',borderRadius:10}}/>
+
+      {/* Canvas area */}
+      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'1.25rem',overflow:'hidden'}}>
+        {!loaded && <div style={{color:'rgba(255,255,255,.25)',fontSize:'.75rem',letterSpacing:'.1em',textTransform:'uppercase'}}>Loading…</div>}
+        <canvas ref={canvasRef} style={{maxWidth:'100%',maxHeight:'100%',display:loaded?'block':'none',borderRadius:6}}/>
       </div>
-      <div style={{padding:'1.25rem 1.5rem 2.5rem',background:'rgba(0,0,0,.5)',backdropFilter:'blur(12px)'}}>
-        <div style={{display:'flex',justifyContent:'center',gap:'1rem'}}>
-          {[{label:'↺',sub:'-90°',action:()=>rotate(-90)},{label:'↻',sub:'+90°',action:()=>rotate(90)},{label:'⇔',sub:'Flip',action:()=>setFlipH(f=>!f)}].map((ctrl,i)=>(
-            <button key={i} onClick={ctrl.action}
-              style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.12)',color:'#fff',borderRadius:14,width:62,height:62,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3}}>
-              <span style={{fontSize:'1.35rem',lineHeight:1}}>{ctrl.label}</span>
-              <span style={{fontSize:'.58rem',color:'rgba(255,255,255,.4)'}}>{ctrl.sub}</span>
+
+      {/* Controls */}
+      <div style={{padding:'1rem 1.25rem 2.75rem',background:'rgba(0,0,0,.7)',backdropFilter:'blur(20px)',flexShrink:0}}>
+        {mode==='adjust' && (
+          <div style={{display:'flex',justifyContent:'center',gap:'.6rem'}}>
+            {[
+              {label:'↺', sub:'Rotate L', action:()=>rotate(-90)},
+              {label:'↻', sub:'Rotate R', action:()=>rotate(90)},
+              {label:'⇔', sub:'Mirror',   action:()=>setFlipH(f=>!f)},
+            ].map((c,i)=>(
+              <button key={i} onClick={c.action} style={ctrlBtn()}
+                onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,.1)'}
+                onMouseLeave={e=>e.currentTarget.style.background='rgba(255,255,255,.05)'}>
+                <span style={{fontSize:'1.4rem',lineHeight:1,fontWeight:300}}>{c.label}</span>
+                <span style={{fontSize:'.55rem',color:'rgba(255,255,255,.3)',textTransform:'uppercase',letterSpacing:'.07em'}}>{c.sub}</span>
+              </button>
+            ))}
+            <button onClick={()=>setShowEnhance(true)}
+              style={{background:'rgba(197,169,106,.1)',border:'1px solid rgba(197,169,106,.25)',color:'var(--gold)',borderRadius:12,width:68,height:64,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,transition:'all .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.background='rgba(197,169,106,.2)'}
+              onMouseLeave={e=>e.currentTarget.style.background='rgba(197,169,106,.1)'}>
+              <span style={{fontSize:'.82rem',fontWeight:700,letterSpacing:'.04em'}}>AI</span>
+              <span style={{fontSize:'.55rem',color:'rgba(197,169,106,.5)',textTransform:'uppercase',letterSpacing:'.07em'}}>Enhance</span>
             </button>
-          ))}
-          <button onClick={()=>setShowEnhance(true)}
-            style={{background:'linear-gradient(135deg,rgba(197,166,106,.9),rgba(168,134,61,.9))',border:'none',color:'#fff',borderRadius:14,width:62,height:62,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3}}>
-            <span style={{fontSize:'1.2rem'}}>✨</span>
-            <span style={{fontSize:'.58rem',fontWeight:700}}>AI</span>
-          </button>
-        </div>
+          </div>
+        )}
+        {mode==='crop' && (
+          <div>
+            <div style={{fontSize:'.6rem',color:'rgba(255,255,255,.25)',textTransform:'uppercase',letterSpacing:'.12em',textAlign:'center',marginBottom:'.6rem'}}>Aspect ratio</div>
+            <div style={{display:'flex',justifyContent:'center',gap:'.4rem',flexWrap:'wrap'}}>
+              {[{label:'Free',val:null},{label:'1:1',val:1},{label:'3:4',val:0.75},{label:'4:3',val:1.333}].map(a=>(
+                <button key={a.label} onClick={()=>applyAspect(a.val)}
+                  style={{...tabBtn(cropAspect===a.val),padding:'.4rem .8rem',borderRadius:8}}>
+                  {a.label}
+                </button>
+              ))}
+            </div>
+            <div style={{textAlign:'center',marginTop:'.55rem',fontSize:'.6rem',color:'rgba(255,255,255,.18)',letterSpacing:'.06em'}}>
+              Tap Done to apply
+            </div>
+          </div>
+        )}
       </div>
+
       {showEnhance&&(
         <EnhanceModal imageUrl={imageUrl} imagePreview={imageUrl} workspace={{id:workspaceId}}
           onSelect={newUrl=>{
             fetch(newUrl).then(r=>r.blob()).then(blob=>{
-              const url=URL.createObjectURL(blob)
+              const blobUrl=URL.createObjectURL(blob)
               const img=new Image()
               img.onload=()=>{imgRef.current=img;draw()}
-              img.src=url
+              img.src=blobUrl
             })
-            toast('✨ Enhanced!');setShowEnhance(false)
+            toast('Photo enhanced.'); setShowEnhance(false)
           }}
           onClose={()=>setShowEnhance(false)} toast={toast}/>
       )}
     </div>
   )
 }
-
-// ── NEXT UP BANNER (FIX 1: exact date, FIX 2: no new_appt, hierarchy fix) ────
 function NextUpBanner({ appts, workspace, onReloaded, toast, lang='en' }) {
   const now=new Date()
   const next=appts.filter(a=>new Date(a.scheduled_at)>now&&a.status==='confirmed').sort((a,b)=>new Date(a.scheduled_at)-new Date(b.scheduled_at))[0]
@@ -1396,11 +1492,23 @@ function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, to
   async function run(){
     setPhase('loading');setLoadingMsg('Preparing image...')
     try{
-      const token=await getToken();setLoadingMsg('AI is crafting your images...')
-      const{request_ids,error}=await call({action:'submit',image_url:imageUrl,style,product_description:'professional hair and beauty care product'},token)
-      if(error) throw new Error(error);setLoadingMsg('Finalising enhanced photos...')
-      const urls=await Promise.all(request_ids.map(id=>waitFor(id,token)));setResults(urls);setPhase('results')
-    }catch(e){toast('Enhancement failed — '+e.message);setPhase('pick')}
+      const token=await getToken()
+      if(!token) throw new Error('Not authenticated')
+      setLoadingMsg('AI is crafting your photos...')
+      const res=await call({action:'submit',image_url:imageUrl,style,product_description:'professional hair and beauty product'},token)
+      // Handle multiple possible response shapes from the edge function
+      if(res?.error) throw new Error(res.error)
+      // Direct URL(s) returned
+      if(res?.urls && Array.isArray(res.urls)){ setResults(res.urls.filter(Boolean)); setPhase('results'); return }
+      if(res?.url){ setResults([res.url]); setPhase('results'); return }
+      if(res?.image_url){ setResults([res.image_url]); setPhase('results'); return }
+      // Async request_ids pattern
+      const ids = res?.request_ids || (res?.request_id ? [res.request_id] : null)
+      if(!ids || !ids.length) throw new Error('No request IDs returned from enhancement service.')
+      setLoadingMsg('Finalising your photos…')
+      const urls=await Promise.all(ids.map(id=>waitFor(id,token)))
+      setResults(urls.filter(Boolean)); setPhase('results')
+    }catch(e){toast('Enhancement unavailable — '+e.message);setPhase('pick')}
   }
   async function pick(url){
     try{
@@ -1418,7 +1526,7 @@ function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, to
       <div style={{background:'var(--surface)',borderRadius:'20px',width:'100%',maxWidth:'480px',overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.4)'}}>
         <div style={{padding:'1.2rem 1.5rem',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div>
-            <div style={{fontSize:'1rem',fontWeight:600,fontFamily:"'Playfair Display',serif"}}>✨ AI Photo Enhancement</div>
+            <div style={{fontSize:'1rem',fontWeight:600,fontFamily:"'Playfair Display',serif"}}>AI Photo Enhancement</div>
             <div style={{fontSize:'.75rem',color:'var(--ink-3)',marginTop:'.15rem'}}>Transform your photo into a professional visual</div>
           </div>
           <button onClick={onClose} style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'8px',width:30,height:30,cursor:'pointer',color:'var(--ink-3)',fontSize:'1.1rem',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
@@ -1428,11 +1536,12 @@ function EnhanceModal({ imageUrl, imagePreview, workspace, onSelect, onClose, to
             <img src={imagePreview||imageUrl} style={{width:'100%',height:140,objectFit:'cover',borderRadius:10,marginBottom:'1.25rem'}} alt="product"/>
             <div style={{fontSize:'.7rem',fontWeight:700,color:'var(--ink-3)',marginBottom:'.65rem',textTransform:'uppercase',letterSpacing:'.08em'}}>Choose a style</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.65rem',marginBottom:'1.25rem'}}>
-              {[{v:'studio',label:'Studio',desc:'Clean background, sharp lighting',ico:'🏛'},{v:'glamour',label:'Glamour',desc:'Marble, bokeh, luxury spa',ico:'✨'}].map(o=>(
-                <div key={o.v} onClick={()=>setStyle(o.v)} style={{border:`2px solid ${style===o.v?'var(--gold)':'var(--border)'}`,borderRadius:12,padding:'.85rem',cursor:'pointer',background:style===o.v?'var(--gold-lt)':'var(--bg)',transition:'all .15s'}}>
-                  <div style={{fontSize:'1.3rem',marginBottom:'.3rem'}}>{o.ico}</div>
-                  <div style={{fontWeight:600,fontSize:'.85rem',color:'var(--ink)'}}>{o.label}</div>
-                  <div style={{fontSize:'.72rem',color:'var(--ink-3)',marginTop:'.15rem',lineHeight:1.4}}>{o.desc}</div>
+              {[{v:'studio',label:'Studio',desc:'Clean background · sharp lighting'},{v:'glamour',label:'Glamour',desc:'Marble · bokeh · luxury spa'}].map(o=>(
+                <div key={o.v} onClick={()=>setStyle(o.v)}
+                  style={{border:`1.5px solid ${style===o.v?'var(--gold)':'var(--border)'}`,borderRadius:12,padding:'.9rem',cursor:'pointer',background:style===o.v?'var(--gold-lt)':'var(--bg)',transition:'all .15s'}}>
+                  <div style={{width:28,height:3,background:style===o.v?'var(--gold)':'var(--border-2)',borderRadius:2,marginBottom:'.6rem',transition:'background .15s'}}/>
+                  <div style={{fontWeight:600,fontSize:'.88rem',color:'var(--ink)',marginBottom:'.2rem'}}>{o.label}</div>
+                  <div style={{fontSize:'.72rem',color:'var(--ink-3)',lineHeight:1.5}}>{o.desc}</div>
                 </div>
               ))}
             </div>
@@ -1946,27 +2055,154 @@ function Formations({ workspace, toast }) {
 }
 
 // ── CLIENTS ────────────────────────────────────────────────────────────────────
+function ClientHistoryPanel({ client, workspace, onClose }) {
+  useScrollLock()
+  const [appts,setAppts]=useState([])
+  const [loading,setLoading]=useState(true)
+  const [tag,setTag]=useState(client.tag||'')
+  const [savingTag,setSavingTag]=useState(false)
+  useEffect(()=>{
+    supabase.from('appointments').select('*, services(name)').eq('workspace_id',workspace.id)
+      .eq('client_name',client.full_name).order('scheduled_at',{ascending:false})
+      .then(({data})=>{setAppts(data||[]);setLoading(false)})
+  },[client.id])
+  async function saveTag(newTag){
+    setSavingTag(true)
+    await supabase.from('clients').update({tag:newTag||null}).eq('id',client.id)
+    setTag(newTag);setSavingTag(false)
+  }
+  const initial=client.full_name?.charAt(0)?.toUpperCase()||'?'
+  const tags=[{v:'',label:'None'},{v:'new',label:'New'},{v:'regular',label:'Regular'},{v:'vip',label:'VIP'}]
+  return (
+    <div className="rev-overlay" onClick={onClose}>
+      <div className="rev-panel" style={{maxHeight:'92vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
+        <div className="rev-panel-head">
+          <div style={{display:'flex',alignItems:'center',gap:'.85rem'}}>
+            <div style={{width:44,height:44,borderRadius:'50%',background:'var(--gold-lt)',border:'1px solid var(--gold-dim)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',color:'var(--gold)',flexShrink:0}}>{initial}</div>
+            <div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',color:'var(--ink)'}}>{client.full_name}</div>
+              <div style={{fontSize:'.72rem',color:'var(--ink-3)',marginTop:1}}>
+                {client.total_visits||0} visit{client.total_visits!==1?'s':''} · {fmtRev(client.total_spent||0)} spent
+              </div>
+            </div>
+          </div>
+          <button className="rev-close" onClick={onClose}>&#10005;</button>
+        </div>
+        {/* Contact info */}
+        {(client.email||client.phone)&&(
+          <div style={{display:'flex',gap:'.5rem',marginBottom:'1rem',flexWrap:'wrap'}}>
+            {client.phone&&<a href={`tel:${client.phone}`} className="btn btn-secondary btn-sm" style={{textDecoration:'none'}}>📞 {client.phone}</a>}
+            {client.email&&<a href={`mailto:${client.email}`} className="btn btn-secondary btn-sm" style={{textDecoration:'none'}}>✉ {client.email}</a>}
+          </div>
+        )}
+        {/* Tag */}
+        <div style={{marginBottom:'1.25rem'}}>
+          <div style={{fontSize:'.7rem',fontWeight:600,color:'var(--ink-3)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'.5rem'}}>Client tag</div>
+          <div style={{display:'flex',gap:'.4rem',flexWrap:'wrap'}}>
+            {tags.map(t=>(
+              <button key={t.v} onClick={()=>saveTag(t.v)} disabled={savingTag}
+                style={{padding:'.3rem .8rem',borderRadius:20,border:'1.5px solid',fontSize:'.75rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all .14s',
+                  borderColor:tag===t.v?'var(--gold)':'var(--border-2)',
+                  background:tag===t.v?'var(--gold-lt)':'var(--surface)',
+                  color:tag===t.v?'var(--gold)':'var(--ink-3)'}}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Appointment history */}
+        <div>
+          <div style={{fontSize:'.7rem',fontWeight:600,color:'var(--ink-3)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:'.65rem'}}>Appointment history</div>
+          {loading?<div style={{fontSize:'.82rem',color:'var(--ink-3)'}}>Loading...</div>
+            :appts.length===0?<div style={{fontSize:'.82rem',color:'var(--ink-3)'}}>No appointments yet.</div>
+            :appts.map(a=>(
+              <div key={a.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'.75rem .85rem',background:'var(--bg)',borderRadius:10,marginBottom:'.5rem'}}>
+                <div>
+                  <div style={{fontWeight:500,fontSize:'.85rem',color:'var(--ink)'}}>{a.services?.name||a.service_name||'—'}</div>
+                  <div style={{fontSize:'.72rem',color:'var(--ink-3)',marginTop:2}}>
+                    {new Date(a.scheduled_at).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})} · {new Date(a.scheduled_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:'.5rem',alignItems:'center',flexShrink:0}}>
+                  <span style={{fontFamily:"'Playfair Display',serif",fontSize:'.9rem',color:'var(--ink)'}}>{fmtRev(a.amount)}</span>
+                  <span className={`badge badge-${a.status}`}>{a.status}</span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        {client.last_visit_at&&(
+          <div style={{fontSize:'.72rem',color:'var(--ink-3)',textAlign:'center',marginTop:'1rem',paddingTop:'1rem',borderTop:'1px solid var(--border)'}}>
+            Last visit: {new Date(client.last_visit_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function Clients({ workspace, lang='en' }) {
   const [data,setData]=useState([])
   const [loading,setLoading]=useState(true)
+  const [selected,setSelected]=useState(null)
+  const [search,setSearch]=useState('')
   useEffect(()=>{if(workspace)fetchData()},[workspace])
-  async function fetchData(){const{data}=await supabase.from('clients').select('*').eq('workspace_id',workspace.id).order('created_at',{ascending:false});setData(data||[]);setLoading(false)}
+  async function fetchData(){
+    const{data}=await supabase.from('clients').select('*').eq('workspace_id',workspace.id).order('total_spent',{ascending:false})
+    setData(data||[]);setLoading(false)
+  }
+  const filtered=data.filter(c=>c.full_name?.toLowerCase().includes(search.toLowerCase()))
+  const totalRevenue=data.reduce((s,c)=>s+Number(c.total_spent||0),0)
+  const totalVisits=data.reduce((s,c)=>s+Number(c.total_visits||0),0)
   return (
     <div>
-      <div className="page-head"><div><div className="page-title">{t(lang,'clients_title')}</div><div className="page-sub">{t(lang,'clients_sub')}</div></div></div>
+      <div className="page-head">
+        <div>
+          <div className="page-title">{t(lang,'clients_title')}</div>
+          <div className="page-sub">{data.length} client{data.length!==1?'s':''} · {fmtRev(totalRevenue)} total · {totalVisits} visit{totalVisits!==1?'s':''}</div>
+        </div>
+      </div>
+      {/* Search */}
+      {data.length>3&&(
+        <div style={{marginBottom:'1rem',position:'relative'}}>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search clients…"
+            style={{width:'100%',padding:'.6rem .85rem .6rem 2.4rem',border:'1px solid var(--border-2)',borderRadius:10,fontSize:'.85rem',fontFamily:'inherit',color:'var(--ink)',background:'var(--surface)',outline:'none',transition:'border .15s'}}
+            onFocus={e=>e.target.style.borderColor='var(--gold)'} onBlur={e=>e.target.style.borderColor='var(--border-2)'}/>
+          <span style={{position:'absolute',left:'.8rem',top:'50%',transform:'translateY(-50%)',fontSize:'.85rem',color:'var(--ink-3)'}}>🔍</span>
+        </div>
+      )}
       <div className="card">
         {loading?<div style={{padding:'2rem',color:'var(--ink-3)'}}>Loading...</div>
-          :data.length===0?<div className="empty-state"><div className="empty-icon">{I.users}</div><div className="empty-title">{t(lang,'no_clients')}</div><div className="empty-sub">{t(lang,'clients_appear')}</div></div>
-          :data.map(c=>(
-            <div key={c.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'1rem 1.25rem',borderBottom:'1px solid var(--border)'}}>
-              <div>
-                <div style={{fontWeight:600,fontSize:'.88rem',color:'var(--ink)'}}>{c.full_name}</div>
-                <div style={{fontSize:'.73rem',color:'var(--ink-3)',marginTop:3}}>{c.total_visits} visit{c.total_visits!==1?'s':''} · {fmtRev(c.total_spent)} spent</div>
+          :filtered.length===0?<div className="empty-state"><div className="empty-icon">{I.users}</div><div className="empty-title">{search?'No results':'No clients yet'}</div><div className="empty-sub">{search?'Try a different name':t(lang,'clients_appear')}</div></div>
+          :filtered.map(c=>{
+            const initial=c.full_name?.charAt(0)?.toUpperCase()||'?'
+            const isTopSpender=data.indexOf(c)===0&&Number(c.total_spent)>0
+            return (
+              <div key={c.id} onClick={()=>setSelected(c)}
+                style={{display:'flex',alignItems:'center',gap:'.85rem',padding:'1rem 1.25rem',borderBottom:'1px solid var(--border)',cursor:'pointer',transition:'background .12s'}}
+                onMouseEnter={e=>e.currentTarget.style.background='var(--bg)'}
+                onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                {/* Avatar */}
+                <div style={{width:38,height:38,borderRadius:'50%',background:isTopSpender?'var(--gold-lt)':'var(--bg)',border:`1.5px solid ${isTopSpender?'var(--gold-dim)':'var(--border)'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Playfair Display',serif",fontSize:'.95rem',color:isTopSpender?'var(--gold)':'var(--ink-3)',flexShrink:0}}>
+                  {initial}
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'.45rem'}}>
+                    <div style={{fontWeight:600,fontSize:'.88rem',color:'var(--ink)'}}>{c.full_name}</div>
+                    {c.tag&&<span className={`badge badge-${c.tag==='vip'?'vip':c.tag==='new'?'new':'confirmed'}`} style={{fontSize:'.6rem',padding:'.15rem .45rem'}}>{c.tag.toUpperCase()}</span>}
+                    {isTopSpender&&<span style={{fontSize:'.6rem',color:'var(--gold)',fontWeight:700}}>⭐ Top</span>}
+                  </div>
+                  <div style={{fontSize:'.72rem',color:'var(--ink-3)',marginTop:2}}>
+                    {c.total_visits||0} visit{c.total_visits!==1?'s':''} · {fmtRev(c.total_spent||0)} spent
+                    {c.last_visit_at&&<span style={{marginLeft:'.4rem'}}>· last {new Date(c.last_visit_at).toLocaleDateString('en-CA',{month:'short',day:'numeric'})}</span>}
+                  </div>
+                </div>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" width="12" height="12" style={{color:'var(--ink-3)',flexShrink:0}}><path d="M6 3l5 5-5 5"/></svg>
               </div>
-              {c.tag&&<span className={`badge badge-${c.tag==='vip'?'vip':c.tag==='new'?'new':'confirmed'}`}>{c.tag.toUpperCase()}</span>}
-            </div>
-          ))}
+            )
+          })}
       </div>
+      {selected&&<ClientHistoryPanel client={selected} workspace={workspace} onClose={()=>{setSelected(null);fetchData()}}/>}
     </div>
   )
 }
@@ -2283,6 +2519,108 @@ function SettingsLanguageForm({ ownerData, toast, refetch, lang='en' }) {
   )
 }
 
+// ── BOOKING MODAL — public client booking form ────────────────────────────────
+function BookingModal({ service, workspace, onClose }) {
+  const [form,setForm]=useState({name:'',phone:'',email:'',date:'',time:'',notes:''})
+  const [saving,setSaving]=useState(false)
+  const [done,setDone]=useState(false)
+  const [error,setError]=useState('')
+  const iS={width:'100%',padding:'.6rem .85rem',border:'1.5px solid #e8e4de',borderRadius:10,fontSize:'.88rem',fontFamily:'inherit',color:'#1a1814',background:'#fff',outline:'none',transition:'border .15s'}
+  async function submit(){
+    if(!form.name.trim()||!form.date||!form.time){setError('Please fill in name, date and time.');return}
+    setSaving(true);setError('')
+    const[h,m]=form.time.split(':')
+    const dt=new Date(form.date+'T00:00:00');dt.setHours(parseInt(h),parseInt(m),0,0)
+    const{error:err}=await supabase.from('appointments').insert({
+      workspace_id:workspace.id,
+      client_name:form.name.trim(),
+      client_phone:form.phone.trim()||null,
+      client_email:form.email.trim()||null,
+      service_id:service.id,
+      service_name:service.name,
+      scheduled_at:dt.toISOString(),
+      amount:service.price||0,
+      status:'pending',
+      notes:form.notes.trim()||null,
+    })
+    setSaving(false)
+    if(err){setError('Something went wrong. Please try again.');return}
+    setDone(true)
+  }
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.45)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={onClose}>
+      <div style={{background:'#fff',borderRadius:'20px 20px 0 0',width:'100%',maxWidth:480,maxHeight:'92vh',overflowY:'auto',boxShadow:'0 -8px 48px rgba(0,0,0,.18)'}} onClick={e=>e.stopPropagation()}>
+        {/* Header */}
+        <div style={{padding:'1.25rem 1.5rem',borderBottom:'1px solid #f0ece4',display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
+          <div>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',color:'#1a1814'}}>{service.name}</div>
+            <div style={{fontSize:'.78rem',color:'#7a7774',marginTop:3}}>
+              {service.duration_min&&`${service.duration_min} min · `}{service.price>0?`$${service.price}`:service.price===0?'Free':''}
+            </div>
+          </div>
+          <button onClick={onClose} style={{background:'#f5f3ef',border:'none',width:30,height:30,borderRadius:'50%',cursor:'pointer',color:'#7a7774',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.85rem'}}>✕</button>
+        </div>
+        <div style={{padding:'1.5rem'}}>
+          {done?(
+            <div style={{textAlign:'center',padding:'1.5rem 0'}}>
+              <div style={{fontSize:'2rem',marginBottom:'.75rem'}}>✅</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',color:'#1a1814',marginBottom:'.4rem'}}>Request sent!</div>
+              <div style={{fontSize:'.82rem',color:'#7a7774',lineHeight:1.6,marginBottom:'1.5rem'}}>
+                {workspace?.name||'Your stylist'} will confirm your appointment shortly.
+              </div>
+              <button onClick={onClose} style={{background:'#1a1814',color:'#fff',border:'none',borderRadius:10,padding:'.65rem 1.5rem',fontSize:'.85rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Done</button>
+            </div>
+          ):(
+            <div style={{display:'flex',flexDirection:'column',gap:'.85rem'}}>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.65rem'}}>
+                <div className="field" style={{gridColumn:'1/-1'}}>
+                  <label style={{fontSize:'.72rem',fontWeight:600,color:'#7a7774',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:'.3rem'}}>Full name *</label>
+                  <input style={iS} value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Amara Diallo"
+                    onFocus={e=>e.target.style.borderColor='#c5a96a'} onBlur={e=>e.target.style.borderColor='#e8e4de'}/>
+                </div>
+                <div className="field">
+                  <label style={{fontSize:'.72rem',fontWeight:600,color:'#7a7774',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:'.3rem'}}>Date *</label>
+                  <input type="date" style={iS} value={form.date} min={new Date().toISOString().split('T')[0]}
+                    onChange={e=>setForm(f=>({...f,date:e.target.value}))}
+                    onFocus={e=>e.target.style.borderColor='#c5a96a'} onBlur={e=>e.target.style.borderColor='#e8e4de'}/>
+                </div>
+                <div className="field">
+                  <label style={{fontSize:'.72rem',fontWeight:600,color:'#7a7774',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:'.3rem'}}>Time *</label>
+                  <input type="time" style={iS} value={form.time} onChange={e=>setForm(f=>({...f,time:e.target.value}))}
+                    onFocus={e=>e.target.style.borderColor='#c5a96a'} onBlur={e=>e.target.style.borderColor='#e8e4de'}/>
+                </div>
+                <div className="field">
+                  <label style={{fontSize:'.72rem',fontWeight:600,color:'#7a7774',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:'.3rem'}}>Phone</label>
+                  <input type="tel" style={iS} value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="+1 (514) …"
+                    onFocus={e=>e.target.style.borderColor='#c5a96a'} onBlur={e=>e.target.style.borderColor='#e8e4de'}/>
+                </div>
+                <div className="field">
+                  <label style={{fontSize:'.72rem',fontWeight:600,color:'#7a7774',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:'.3rem'}}>Email</label>
+                  <input type="email" style={iS} value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} placeholder="client@email.com"
+                    onFocus={e=>e.target.style.borderColor='#c5a96a'} onBlur={e=>e.target.style.borderColor='#e8e4de'}/>
+                </div>
+                <div className="field" style={{gridColumn:'1/-1'}}>
+                  <label style={{fontSize:'.72rem',fontWeight:600,color:'#7a7774',textTransform:'uppercase',letterSpacing:'.05em',display:'block',marginBottom:'.3rem'}}>Notes</label>
+                  <input style={iS} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Hair length, allergies, preferences…"
+                    onFocus={e=>e.target.style.borderColor='#c5a96a'} onBlur={e=>e.target.style.borderColor='#e8e4de'}/>
+                </div>
+              </div>
+              {error&&<div style={{fontSize:'.78rem',color:'#c0392b',background:'rgba(192,57,43,.06)',border:'1px solid rgba(192,57,43,.15)',borderRadius:8,padding:'.55rem .85rem'}}>{error}</div>}
+              <div style={{display:'flex',gap:'.65rem',paddingTop:'.25rem',paddingBottom:'.5rem'}}>
+                <button onClick={onClose} style={{flex:1,padding:'.7rem',background:'none',border:'1.5px solid #e8e4de',borderRadius:10,cursor:'pointer',fontFamily:'inherit',fontSize:'.85rem',color:'#7a7774'}}>Cancel</button>
+                <button onClick={submit} disabled={saving}
+                  style={{flex:2,padding:'.7rem',background:'#1a1814',color:'#fff',border:'none',borderRadius:10,cursor:'pointer',fontFamily:'inherit',fontSize:'.85rem',fontWeight:700,opacity:saving?.7:1}}>
+                  {saving?'Sending…':'Send request'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── CLIENT PAGE — used both for toggle preview and public page ─────────────────
 function ClientPage({ workspace, onSwitchToDash }) {
   const [tab,setTab]=useState('book')
@@ -2430,22 +2768,9 @@ function ClientPage({ workspace, onSwitchToDash }) {
       <div style={{textAlign:'center',padding:'2rem 1.25rem',fontSize:'.75rem',color:'#b0aba4',background:'#1a1814',marginTop:'2rem'}}>
         <p>Powered by <strong style={{color:'var(--gold)'}}>Organized.</strong> — beorganized.io</p>
       </div>
-      {/* Booking modal */}
+      {/* Booking modal — creates real pending appointment in Supabase */}
       {modal&&(
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.4)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={()=>setModal(null)}>
-          <div style={{background:'#fff',borderRadius:'18px 18px 0 0',width:'100%',maxWidth:480,padding:'1.75rem',display:'flex',flexDirection:'column',gap:'1rem',maxHeight:'90vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
-            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',color:'#1a1814'}}>Book — {modal.name}</div>
-            <div style={{fontSize:'.8rem',color:'#7a7774'}}>Fill in your details and we will confirm your appointment.</div>
-            <div className="field"><label>Full name</label><input placeholder="e.g. Amara Diallo"/></div>
-            <div className="field"><label>Phone number</label><input placeholder="+1 (514) ..."/></div>
-            <div className="field"><label>Preferred date</label><input type="date"/></div>
-            <div className="field"><label>Notes (optional)</label><input placeholder="Hair length, allergies..."/></div>
-            <div style={{display:'flex',gap:'.65rem',paddingTop:'.25rem'}}>
-              <button className="btn btn-secondary" style={{flex:1,justifyContent:'center'}} onClick={()=>setModal(null)}>Cancel</button>
-              <button className="btn btn-primary" style={{flex:1,justifyContent:'center'}} onClick={()=>setModal(null)}>Send request</button>
-            </div>
-          </div>
-        </div>
+        <BookingModal service={modal} workspace={workspace} onClose={()=>setModal(null)}/>
       )}
     </div>
   )
