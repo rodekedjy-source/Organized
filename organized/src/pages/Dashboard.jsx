@@ -1119,8 +1119,13 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
         </div>
         {/* FIX 2: only copy link button */}
         <div className="head-actions">
-          <button className="btn btn-secondary btn-sm" onClick={()=>{navigator.clipboard?.writeText(`https://beorganized.io/${workspace?.slug||''}`);toast(t(lang,'link_copied'))}}>
-            <span style={{width:14,height:14,display:'flex'}}>{I.link}</span> {t(lang,'copy_link')}
+          <button className="btn btn-secondary btn-sm" onClick={()=>{
+            const url=`https://beorganized.io/${workspace?.slug||''}`
+            navigator.clipboard?.writeText(url)
+            toast(t(lang,'link_copied'))
+          }}>
+            <span style={{width:14,height:14,display:'flex'}}>{I.link}</span>
+            {workspace?.slug?`beorganized.io/${workspace.slug}`:t(lang,'copy_link')}
           </button>
         </div>
       </div>
@@ -1473,6 +1478,7 @@ function Products({ workspace, toast }) {
   const [showDotMenu,setShowDotMenu]=useState(false)
   const [deleting,setDeleting]=useState(false)
   const [editorTarget,setEditorTarget]=useState(null)
+  const fileInputRef=useRef(null)
 
   useEffect(()=>{if(workspace)fetchData()},[workspace])
   async function fetchData(){const{data}=await supabase.from('products').select('*').eq('workspace_id',workspace.id).order('created_at',{ascending:false});setData(data||[])}
@@ -1529,13 +1535,16 @@ function Products({ workspace, toast }) {
           </div>
           <div>
             <div style={{fontSize:'.75rem',fontWeight:600,color:'var(--ink-3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'.5rem'}}>Photos</div>
-            <label style={{display:'block',border:'2px dashed var(--border-2)',borderRadius:12,padding:'1rem',textAlign:'center',cursor:'pointer',transition:'all .15s',background:'var(--bg)'}}
-              onMouseEnter={e=>e.currentTarget.style.borderColor='var(--gold)'} onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border-2)'}>
-              <input type="file" accept="image/*" multiple style={{display:'none'}} onChange={handleImageSelect}/>
-              <div style={{fontSize:'1.3rem',marginBottom:'.2rem'}}>📷</div>
-              <div style={{fontSize:'.78rem',fontWeight:500,color:'var(--ink-2)'}}>{uploading?'Uploading…':'Click to add photos'}</div>
-              <div style={{fontSize:'.68rem',color:'var(--ink-3)',marginTop:'.15rem'}}>JPG · PNG · WEBP · tap to edit after upload</div>
-            </label>
+            <div>
+              <input ref={fileInputRef} type="file" accept="image/*" multiple style={{display:'none'}} onChange={handleImageSelect}/>
+              <button type="button" onClick={()=>fileInputRef.current?.click()}
+                style={{width:'100%',border:'2px dashed var(--border-2)',borderRadius:12,padding:'1.1rem',textAlign:'center',cursor:'pointer',transition:'all .15s',background:'var(--bg)',fontFamily:'inherit'}}
+                onFocus={e=>e.target.style.borderColor='var(--gold)'} onBlur={e=>e.target.style.borderColor='var(--border-2)'}>
+                <div style={{fontSize:'1.3rem',marginBottom:'.2rem'}}>📷</div>
+                <div style={{fontSize:'.78rem',fontWeight:500,color:'var(--ink-2)'}}>{uploading?'Uploading…':'Tap to add photos'}</div>
+                <div style={{fontSize:'.68rem',color:'var(--ink-3)',marginTop:'.15rem'}}>JPG · PNG · WEBP · tap photo to edit</div>
+              </button>
+            </div>
             {pendingImgs.length>0&&(
               <div style={{display:'flex',gap:'.45rem',flexWrap:'wrap',marginTop:'.65rem'}}>
                 {pendingImgs.map((img,i)=>(
@@ -2240,13 +2249,14 @@ function ClientPage({ workspace }) {
     ]).then(([s,p,o])=>{setServices(s.data||[]);setProducts(p.data||[]);setOfferings(o.data||[])})
   },[workspace])
   const initial=workspace?.name?.charAt(0)?.toUpperCase()||'?'
+  const clientUrl=workspace?.slug?`https://beorganized.io/${workspace.slug}`:null
   return (
     <div style={{background:'#fff',minHeight:'100vh'}}>
       <div className="cp-topbar">
         <div className="cp-logo">{workspace?.name||'Your Studio'}<span style={{color:'var(--gold)'}}>.</span></div>
         <div style={{display:'flex',gap:'.75rem'}}>
           {workspace?.instagram&&<button className="cp-ghost" onClick={()=>window.open(`https://instagram.com/${workspace.instagram.replace('@','')}`)}>Instagram</button>}
-          {workspace?.phone&&<button className="cp-ghost">Contact</button>}
+          {clientUrl&&<button className="cp-ghost" onClick={()=>{navigator.clipboard?.writeText(clientUrl)}}>Copier lien</button>}
         </div>
       </div>
       <div className="cp-hero">
@@ -2347,11 +2357,12 @@ export default function Dashboard() {
 
   if(clientView) return (
     <div>
+      <style>{css}</style>
       <div style={{position:'fixed',top:0,left:0,right:0,zIndex:99,background:'var(--ink)',color:'#fff',padding:'.5rem 1rem',display:'flex',alignItems:'center',justifyContent:'space-between',fontSize:'.75rem'}}>
-        <span style={{color:'rgba(255,255,255,.5)'}}>Preview: Client View</span>
-        <button onClick={()=>setClientView(false)} style={{background:'var(--gold)',border:'none',color:'var(--ink)',borderRadius:6,padding:'.25rem .75rem',cursor:'pointer',fontFamily:'inherit',fontWeight:600,fontSize:'.72rem'}}>Exit preview</button>
+        <span style={{color:'rgba(255,255,255,.5)'}}>Vue client</span>
+        <button onClick={()=>setClientView(false)} style={{background:'var(--gold)',border:'none',color:'var(--ink)',borderRadius:6,padding:'.25rem .75rem',cursor:'pointer',fontFamily:'inherit',fontWeight:600,fontSize:'.72rem'}}>← Retour</button>
       </div>
-      <div style={{paddingTop:36}}><ClientPage workspace={workspace}/></div>
+      <div style={{paddingTop:40}}><ClientPage workspace={workspace}/></div>
     </div>
   )
 
@@ -2417,6 +2428,18 @@ export default function Dashboard() {
           ))}
         </nav>
         <div className="sb-footer">
+          {workspace?.slug&&(
+            <div style={{marginBottom:'.65rem',padding:'.65rem .85rem',background:'var(--gold-lt)',border:'1px solid var(--gold-dim)',borderRadius:10,cursor:'pointer'}}
+              onClick={()=>{navigator.clipboard?.writeText(`https://beorganized.io/${workspace.slug}`);toast('Lien copié !');setMenuOpen(false)}}>
+              <div style={{fontSize:'.6rem',fontWeight:700,color:'var(--gold)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:3}}>Ton lien de réservation</div>
+              <div style={{fontSize:'.76rem',color:'var(--ink-2)',fontWeight:500,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>beorganized.io/{workspace.slug}</div>
+              <div style={{fontSize:'.65rem',color:'var(--ink-3)',marginTop:3}}>Appuie pour copier · Partage ce lien</div>
+            </div>
+          )}
+          <button style={{width:'100%',marginBottom:'.5rem',padding:'.55rem',background:'var(--ink)',border:'none',borderRadius:8,cursor:'pointer',fontFamily:'inherit',fontSize:'.8rem',color:'#fff',fontWeight:600}}
+            onClick={()=>{setClientView(true);setMenuOpen(false)}}>
+            Voir ma page client →
+          </button>
           <button className="sb-signout" onClick={handleSignOut}>{t(lang,'nav_signout')}</button>
         </div>
       </div>
