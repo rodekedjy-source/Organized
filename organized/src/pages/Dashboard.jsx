@@ -1079,7 +1079,16 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
     const ad=a.data||[]
     setAllAppts(ad);setBlockedDates(b.data||[])
     const monthApptsCount=ad.filter(x=>{const d=new Date(x.scheduled_at);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()}).length
-    setStats({revenue:ad.reduce((s,x)=>s+Number(x.amount||0),0),appointments:ad.length,monthAppts:monthApptsCount,pending:ad.filter(x=>x.status==='pending').length,products:(p.data||[]).length,students:(e.data||[]).length})
+    setStats({
+      revenue:ad.reduce((s,x)=>s+Number(x.amount||0),0),
+      appointments:ad.length,
+      monthAppts:monthApptsCount,
+      pending:ad.filter(x=>x.status==='pending').length,
+      confirmed:ad.filter(x=>x.status==='confirmed'&&new Date(x.scheduled_at).getMonth()===new Date().getMonth()).length,
+      cancelled:ad.filter(x=>x.status==='cancelled'&&new Date(x.scheduled_at).getMonth()===new Date().getMonth()).length,
+      products:(p.data||[]).length,
+      students:(e.data||[]).length
+    })
     setAppts(ad.filter(x=>x.scheduled_at?.startsWith(today)).sort((a,b)=>new Date(a.scheduled_at)-new Date(b.scheduled_at)))
     const todayStart=new Date();todayStart.setHours(0,0,0,0)
     setRemindersSent(ad.filter(x=>x.reminder_sent_at&&new Date(x.reminder_sent_at)>=todayStart).map(x=>({name:x.client_name,time:new Date(x.reminder_sent_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})})))
@@ -1103,7 +1112,8 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
     {label:'Revenue — '+new Date().toLocaleDateString('en-US',{month:'long'}),value:fmtRev(mRev),
       delta:mDelta!==null?`${mDelta>=0?'↑':'↓'} ${Math.abs(mDelta)}% vs last month`:'—',up:mDelta===null||mDelta>=0,page:'revenue'},
     {label:'Appointments',value:stats.monthAppts,
-      delta:stats.pending>0?`${stats.pending} pending`:'All confirmed',up:stats.pending===0,page:'appointments'},
+      delta:stats.pending>0?`${stats.pending} pending confirmation`:stats.cancelled>0?`${stats.cancelled} cancelled`:`${stats.confirmed} confirmed`,
+      up:stats.pending===0,page:'appointments'},
     {label:'Products',value:stats.products,delta:'Listed in your shop',up:true,page:'products'},
     {label:'Students',value:stats.students,delta:'Total enrollments',up:true,page:'formations'},
   ]
@@ -1982,10 +1992,13 @@ function Availability({ workspace, toast, lang='en' }) {
               <button
                 onClick={()=>toggleDay(day.id,day.is_open)}
                 style={{
-                  minWidth:72,padding:'.35rem .75rem',borderRadius:20,border:'1.5px solid',fontSize:'.78rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all .18s',flexShrink:0,
+                  minWidth:80,padding:'.38rem .9rem',borderRadius:20,border:'2px solid',
+                  fontSize:'.78rem',fontWeight:700,cursor:'pointer',fontFamily:'inherit',
+                  transition:'all .18s',flexShrink:0,letterSpacing:'.02em',
                   borderColor:day.is_open?'var(--ink)':'var(--border-2)',
-                  background:day.is_open?'var(--ink)':'var(--surface)',
-                  color:day.is_open?'#fff':'var(--ink-3)'
+                  background:day.is_open?'var(--ink)':'transparent',
+                  color:day.is_open?'#fff':'var(--ink-3)',
+                  boxShadow:day.is_open?'0 2px 8px rgba(0,0,0,.15)':'none'
                 }}>
                 {day.is_open?t(lang,'open'):t(lang,'closed')}
               </button>
@@ -2360,6 +2373,8 @@ export default function Dashboard() {
     </div>
   )
 
+  const initials=(()=>{const n=ownerData?.full_name||firstName(workspace,session)||'';const parts=n.trim().split(' ');return parts.length>1?parts[0][0]+parts[1][0]:parts[0]?.[0]||'?'})()
+
   if(clientView) return (
     <div className="app-wrap">
       <style>{css}</style>
@@ -2393,7 +2408,7 @@ export default function Dashboard() {
     }
   }
 
-  const initials=(()=>{const n=ownerData?.full_name||firstName(workspace,session)||'';const parts=n.trim().split(' ');return parts.length>1?parts[0][0]+parts[1][0]:parts[0]?.[0]||'?'})()
+
 
   return (
     <div className="app-wrap">
