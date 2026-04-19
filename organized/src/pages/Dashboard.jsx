@@ -1059,11 +1059,23 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
   const [allAppts,setAllAppts]=useState([])
   const [blockedDates,setBlockedDates]=useState([])
   const [selectedDay,setSelectedDay]=useState(null)
-  const [stats,setStats]=useState({revenue:0,appointments:0,monthAppts:0,pending:0,products:0,students:0})
+  const [stats,setStats]=useState({revenue:0,appointments:0,monthAppts:0,pending:0,confirmed:0,cancelled:0,products:0,students:0})
   const [showRevenue,setShowRevenue]=useState(false)
   const [remindersSent,setRemindersSent]=useState([])
   useEffect(()=>{
     if(!workspace) return
+    // Show cached data instantly while fresh data loads
+    const cacheKey=`org_cache_${workspace.id}`
+    const cached=localStorage.getItem(cacheKey)
+    if(cached){
+      try{
+        const{appts:ca,blocked:cb,stats:cs,today:ct}=JSON.parse(cached)
+        if(ca) setAllAppts(ca)
+        if(cb) setBlockedDates(cb)
+        if(cs) setStats(cs)
+        if(ct) setAppts(ct)
+      }catch(_){}
+    }
     fetchData()
     const ch=supabase.channel('ov-rt').on('postgres_changes',{event:'*',schema:'public',table:'appointments',filter:`workspace_id=eq.${workspace.id}`},fetchData).subscribe()
     return()=>supabase.removeChannel(ch)
@@ -1077,21 +1089,31 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
       supabase.from('blocked_dates').select('*').eq('workspace_id',workspace.id),
     ])
     const ad=a.data||[]
-    setAllAppts(ad);setBlockedDates(b.data||[])
-    const monthApptsCount=ad.filter(x=>{const d=new Date(x.scheduled_at);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()}).length
-    setStats({
+    const bd=b.data||[]
+    const pd=p.data||[]
+    const ed=e.data||[]
+    setAllAppts(ad);setBlockedDates(bd)
+    const monthNow=now.getMonth(),yearNow=now.getFullYear()
+    const monthApptsCount=ad.filter(x=>{const d=new Date(x.scheduled_at);return d.getFullYear()===yearNow&&d.getMonth()===monthNow}).length
+    const newStats={
       revenue:ad.reduce((s,x)=>s+Number(x.amount||0),0),
       appointments:ad.length,
       monthAppts:monthApptsCount,
       pending:ad.filter(x=>x.status==='pending').length,
-      confirmed:ad.filter(x=>x.status==='confirmed'&&new Date(x.scheduled_at).getMonth()===new Date().getMonth()).length,
-      cancelled:ad.filter(x=>x.status==='cancelled'&&new Date(x.scheduled_at).getMonth()===new Date().getMonth()).length,
-      products:(p.data||[]).length,
-      students:(e.data||[]).length
-    })
-    setAppts(ad.filter(x=>x.scheduled_at?.startsWith(today)).sort((a,b)=>new Date(a.scheduled_at)-new Date(b.scheduled_at)))
+      confirmed:ad.filter(x=>x.status==='confirmed'&&new Date(x.scheduled_at).getMonth()===monthNow).length,
+      cancelled:ad.filter(x=>x.status==='cancelled'&&new Date(x.scheduled_at).getMonth()===monthNow).length,
+      products:pd.length,
+      students:ed.length
+    }
+    const todayAppts=ad.filter(x=>x.scheduled_at?.startsWith(today)).sort((a,b)=>new Date(a.scheduled_at)-new Date(b.scheduled_at))
+    setStats(newStats)
+    setAppts(todayAppts)
     const todayStart=new Date();todayStart.setHours(0,0,0,0)
     setRemindersSent(ad.filter(x=>x.reminder_sent_at&&new Date(x.reminder_sent_at)>=todayStart).map(x=>({name:x.client_name,time:new Date(x.reminder_sent_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})})))
+    // Cache for next visit
+    try{
+      localStorage.setItem(`org_cache_${workspace.id}`,JSON.stringify({appts:ad,blocked:bd,stats:newStats,today:todayAppts,ts:Date.now()}))
+    }catch(_){}
   }
   async function handleBlock(dayStr,reason){
     const affected=allAppts.filter(a=>a.scheduled_at?.startsWith(dayStr)&&a.status!=='cancelled'&&a.client_email)
@@ -1112,7 +1134,7 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
     {label:'Revenue — '+new Date().toLocaleDateString('en-US',{month:'long'}),value:fmtRev(mRev),
       delta:mDelta!==null?`${mDelta>=0?'↑':'↓'} ${Math.abs(mDelta)}% vs last month`:'—',up:mDelta===null||mDelta>=0,page:'revenue'},
     {label:'Appointments',value:stats.monthAppts,
-      delta:stats.pending>0?`${stats.pending} pending confirmation`:stats.cancelled>0?`${stats.cancelled} cancelled`:`${stats.confirmed} confirmed`,
+      delta:stats.pending>0?`${stats.pending} pending confirmation`:stats.cancelled>0?`${stats.cancelled} cancelled`:stats.confirmed>0?`${stats.confirmed} confirmed`:'—',
       up:stats.pending===0,page:'appointments'},
     {label:'Products',value:stats.products,delta:'Listed in your shop',up:true,page:'products'},
     {label:'Students',value:stats.students,delta:'Total enrollments',up:true,page:'formations'},
