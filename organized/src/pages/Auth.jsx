@@ -67,6 +67,7 @@ const css = `
 .spinner-dark{width:16px;height:16px;border:2px solid rgba(0,0,0,.15);border-top-color:#0d0c0a;border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .auth-hint{display:flex;align-items:center;gap:.5rem;padding:.65rem .85rem;background:#f7f5f0;border-radius:8px;font-size:.75rem;color:#7a7672;margin-bottom:1.25rem;}
+.auth-checking{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;}
 @media(max-width:768px){
   .auth-shell{grid-template-columns:1fr;}
   .auth-left{display:none;}
@@ -75,21 +76,19 @@ const css = `
 `
 
 function getStrength(pw) {
-  if (!pw) return { w:0, color:'#e4e0d8', label:'' }
+  if(!pw) return{w:0,color:'#e4e0d8',label:''}
   let s=0
-  if(pw.length>=8) s++
-  if(pw.length>=12) s++
-  if(/[A-Z]/.test(pw)) s++
-  if(/[0-9]/.test(pw)) s++
-  if(/[^A-Za-z0-9]/.test(pw)) s++
-  if(s<=1) return{w:20,color:'#c0392b',label:'Weak'}
-  if(s<=2) return{w:45,color:'#e67e22',label:'Fair'}
-  if(s<=3) return{w:70,color:'#f1c40f',label:'Good'}
+  if(pw.length>=8)s++ ; if(pw.length>=12)s++
+  if(/[A-Z]/.test(pw))s++ ; if(/[0-9]/.test(pw))s++
+  if(/[^A-Za-z0-9]/.test(pw))s++
+  if(s<=1)return{w:20,color:'#c0392b',label:'Weak'}
+  if(s<=2)return{w:45,color:'#e67e22',label:'Fair'}
+  if(s<=3)return{w:70,color:'#f1c40f',label:'Good'}
   return{w:100,color:'#2e7d52',label:'Strong'}
 }
 
-function GoogleIcon() {
-  return (
+function GoogleIcon(){
+  return(
     <svg width="18" height="18" viewBox="0 0 24 24">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -100,11 +99,12 @@ function GoogleIcon() {
 }
 
 export default function Auth({ onAuth }) {
-  const [mode,       setMode]     = useState('signup')
-  const [step,       setStep]     = useState(1)
-  const [loading,    setLoading]  = useState(false)
-  const [gLoading,   setGLoading] = useState(false)
-  const [error,      setError]    = useState('')
+  const [mode,       setMode]    = useState('signup')
+  const [step,       setStep]    = useState(1)
+  const [loading,    setLoading] = useState(false)
+  const [gLoading,   setGLoading]= useState(false)
+  const [checking,   setChecking]= useState(true)   // checking OAuth session on mount
+  const [error,      setError]   = useState('')
   const [forgotMode, setForgotMode] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
   const [oauthFlow,  setOauthFlow]  = useState(false)
@@ -117,90 +117,102 @@ export default function Auth({ onAuth }) {
 
   function set(k,v){ setForm(f=>({...f,[k]:v})); setError('') }
 
-  // ── On mount: handle both OAuth callback AND existing sessions ──
-  // This is the SINGLE place where we decide what to show.
+  // ── Mount: check if a session already exists (OAuth callback) ──
+  // This is the RELIABLE way — getSession() works even if the SIGNED_IN
+  // event fired before this component mounted (race condition).
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        // Only care about fresh sign-ins while on /auth
-        if (event !== 'SIGNED_IN' || !session) return
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
 
-        // Check if this user already has a workspace
+        if (!session) {
+          // No session = normal new visitor, show signup/login
+          setChecking(false)
+          return
+        }
+
+        // Session exists on /auth — this is an OAuth return
+        // Check if they already have a workspace
         const { data: workspace } = await supabase
           .from('workspaces').select('id')
           .eq('user_id', session.user.id).maybeSingle()
 
         if (workspace) {
-          // Returning user with workspace → go to dashboard
+          // Returning user with workspace — send to dashboard
           onAuth(session)
           navigate('/dashboard')
-        } else {
-          // New OAuth user → show business setup
-          const meta = session.user.user_metadata || {}
-          setForm(f => ({
-            ...f,
-            full_name: meta.full_name || meta.name || '',
-            email:     session.user.email || '',
-          }))
-          setOauthFlow(true)
-          setMode('signup')
-          setStep(3)
+          return
         }
-      }
-    )
-    return () => subscription.unsubscribe()
-  }, [])
 
-  // ── OTP ───────────────────────────────────────────────────────
+        // New OAuth user — no workspace yet — show business setup
+        const meta = session.user.user_metadata || {}
+        setForm(f => ({
+          ...f,
+          full_name: meta.full_name || meta.name || '',
+          email:     session.user.email || '',
+        }))
+        setOauthFlow(true)
+        setMode('signup')
+        setStep(3)
+
+      } catch(err) {
+        console.error('Auth init error:', err)
+      } finally {
+        setChecking(false)
+      }
+    }
+
+    init()
+  }, []) // runs once on mount only
+
+  // ── OTP ──────────────────────────────────────────────────────
   function handleOtp(i,val){
-    if(!/^\d*$/.test(val)) return
-    const next=[...otp]; next[i]=val.slice(-1); setOtp(next)
-    if(val&&i<5) document.getElementById(`otp-${i+1}`)?.focus()
+    if(!/^\d*$/.test(val))return
+    const next=[...otp];next[i]=val.slice(-1);setOtp(next)
+    if(val&&i<5)document.getElementById(`otp-${i+1}`)?.focus()
   }
   function handleOtpKey(i,e){
-    if(e.key==='Backspace'&&!otp[i]&&i>0) document.getElementById(`otp-${i-1}`)?.focus()
+    if(e.key==='Backspace'&&!otp[i]&&i>0)document.getElementById(`otp-${i-1}`)?.focus()
   }
 
   // ── GOOGLE ────────────────────────────────────────────────────
   async function signInWithGoogle(){
     setGLoading(true); setError('')
-    const { error } = await supabase.auth.signInWithOAuth({
+    const{error}=await supabase.auth.signInWithOAuth({
       provider:'google',
       options:{
         redirectTo:`${window.location.origin}/auth`,
         queryParams:{access_type:'offline',prompt:'consent'},
       },
     })
-    if(error){ setError(error.message); setGLoading(false) }
+    if(error){setError(error.message);setGLoading(false)}
   }
 
   // ── STEP 1 ────────────────────────────────────────────────────
   async function submitStep1(e){
-    e.preventDefault(); setError('')
-    if(!form.full_name.trim())   return setError('Please enter your full name.')
-    if(!form.email.trim())       return setError('Please enter your email.')
-    if(form.password.length<8)   return setError('Password must be at least 8 characters.')
+    e.preventDefault();setError('')
+    if(!form.full_name.trim()) return setError('Please enter your full name.')
+    if(!form.email.trim())     return setError('Please enter your email.')
+    if(form.password.length<8) return setError('Password must be at least 8 characters.')
     if(form.password!==form.confirm_password) return setError('Passwords do not match.')
     setLoading(true)
     const{error}=await supabase.auth.signUp({
-      email:form.email, password:form.password,
+      email:form.email,password:form.password,
       options:{data:{full_name:form.full_name}},
     })
     if(error){setError(error.message);setLoading(false);return}
-    setStep(2); setLoading(false)
+    setStep(2);setLoading(false)
   }
 
   // ── STEP 2 ────────────────────────────────────────────────────
   async function submitStep2(e){
-    e.preventDefault(); setError('')
+    e.preventDefault();setError('')
     const code=otp.join('')
-    if(code.length<6) return setError('Please enter the full 6-digit code.')
+    if(code.length<6)return setError('Please enter the full 6-digit code.')
     setLoading(true)
-    const{error}=await supabase.auth.verifyOtp({
-      email:form.email,token:code,type:'email',
-    })
+    const{error}=await supabase.auth.verifyOtp({email:form.email,token:code,type:'email'})
     if(error){setError('Invalid or expired code.');setLoading(false);return}
-    setStep(3); setLoading(false)
+    setStep(3);setLoading(false)
   }
 
   async function resendCode(){
@@ -209,7 +221,7 @@ export default function Auth({ onAuth }) {
 
   // ── STEP 3 — Create workspace ─────────────────────────────────
   async function submitStep3(e){
-    e.preventDefault(); setError('')
+    e.preventDefault();setError('')
     if(!form.business_name.trim()) return setError('Please enter your business name.')
     if(!form.business_type)        return setError('Please select a business type.')
     setLoading(true)
@@ -249,8 +261,8 @@ export default function Auth({ onAuth }) {
 
   // ── LOGIN ─────────────────────────────────────────────────────
   async function submitLogin(e){
-    e.preventDefault(); setError('')
-    if(!form.email||!form.password) return setError('Please fill in all fields.')
+    e.preventDefault();setError('')
+    if(!form.email||!form.password)return setError('Please fill in all fields.')
     setLoading(true)
     const{data,error}=await supabase.auth.signInWithPassword({
       email:form.email,password:form.password,
@@ -263,16 +275,27 @@ export default function Auth({ onAuth }) {
 
   // ── FORGOT ────────────────────────────────────────────────────
   async function submitForgot(e){
-    e.preventDefault(); setError('')
-    if(!form.email) return setError('Please enter your email.')
+    e.preventDefault();setError('')
+    if(!form.email)return setError('Please enter your email.')
     setLoading(true)
     await supabase.auth.resetPasswordForEmail(form.email,{
       redirectTo:`${window.location.origin}/auth`,
     })
-    setForgotSent(true); setLoading(false)
+    setForgotSent(true);setLoading(false)
   }
 
-  const progress = mode==='login' ? 100 : oauthFlow ? 100 : (step/3)*100
+  // ── Show a small spinner while checking OAuth session ─────────
+  // This replaces the full splash — it's fast (< 500ms usually)
+  if(checking) return(
+    <div className="auth-checking">
+      <style>{css}</style>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',color:'#b5893a'}}>
+        Organized<span style={{color:'#0d0c0a'}}>.</span>
+      </div>
+    </div>
+  )
+
+  const progress = mode==='login'?100:oauthFlow?100:(step/3)*100
   const strength = getStrength(form.password)
 
   return(
@@ -286,7 +309,9 @@ export default function Auth({ onAuth }) {
           <div className="auth-logo" onClick={()=>navigate('/')}>Organized<span>.</span></div>
           <div className="auth-left-body">
             <div className="auth-left-title">
-              {mode==='login'?<>Welcome<br/>back.</>:<>Your business,<br/><em style={{color:'#b5893a'}}>finally organized.</em></>}
+              {mode==='login'
+                ?<>Welcome<br/>back.</>
+                :<>Your business,<br/><em style={{color:'#b5893a'}}>finally organized.</em></>}
             </div>
             <div className="auth-left-sub">
               {mode==='login'
@@ -309,12 +334,10 @@ export default function Auth({ onAuth }) {
           {mode==='signup'&&oauthFlow&&(
             <div className="auth-steps-preview">
               <div className="auth-step-prev done">
-                <div className="auth-step-dot done-dot">✓</div>
-                Google account
+                <div className="auth-step-dot done-dot">✓</div>Google account
               </div>
               <div className="auth-step-prev">
-                <div className="auth-step-dot active">2</div>
-                Your business
+                <div className="auth-step-dot active">2</div>Your business
               </div>
             </div>
           )}
@@ -334,8 +357,7 @@ export default function Auth({ onAuth }) {
                 <div className="auth-sub">Sign in to your Organized. dashboard.</div>
                 {error&&<div className="auth-error">{error}</div>}
                 <button type="button" className="btn-google" onClick={signInWithGoogle} disabled={gLoading}>
-                  {gLoading?<div className="spinner-dark"/>:<GoogleIcon/>}
-                  Continue with Google
+                  {gLoading?<div className="spinner-dark"/>:<GoogleIcon/>}Continue with Google
                 </button>
                 <div className="auth-divider">
                   <div className="auth-divider-line"/>
@@ -364,7 +386,7 @@ export default function Auth({ onAuth }) {
                 <div className="auth-title">Reset password</div>
                 <div className="auth-sub">We'll send a reset link to your email.</div>
                 {forgotSent
-                  ?<div className="auth-success-msg">Reset link sent to <strong>{form.email}</strong>. Check your inbox.</div>
+                  ?<div className="auth-success-msg">Reset link sent to <strong>{form.email}</strong>.</div>
                   :<>
                     {error&&<div className="auth-error">{error}</div>}
                     <div className="auth-field"><label>Email</label>
@@ -387,8 +409,7 @@ export default function Auth({ onAuth }) {
                 <div className="auth-sub">Start your 14-day free trial. No credit card needed.</div>
                 {error&&<div className="auth-error">{error}</div>}
                 <button type="button" className="btn-google" onClick={signInWithGoogle} disabled={gLoading}>
-                  {gLoading?<div className="spinner-dark"/>:<GoogleIcon/>}
-                  Continue with Google
+                  {gLoading?<div className="spinner-dark"/>:<GoogleIcon/>}Continue with Google
                 </button>
                 <div className="auth-divider">
                   <div className="auth-divider-line"/>
