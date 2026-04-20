@@ -11,59 +11,37 @@ export default function App() {
   const [ready,   setReady]   = useState(false)
 
   useEffect(() => {
+    // Init — catch all errors, always exit splash
     supabase.auth.getSession()
-      .then(({ data }) => {
-        setSession(data?.session ?? null)
-      })
-      .catch(() => {
-        setSession(null) // lock contention or network error — treat as no session
-      })
-      .finally(() => {
-        setReady(true)  // ALWAYS exit loading, no matter what
-      })
+      .then(({ data }) => setSession(data?.session ?? null))
+      .catch(() => setSession(null))
+      .finally(() => setReady(true))
 
+    // Keep session in sync — no redirects here, routes handle that
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session ?? null)
-      }
+      (_, session) => setSession(session ?? null)
     )
-
     return () => subscription.unsubscribe()
   }, [])
 
   if (!ready) return (
     <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#f7f5f0',
+      minHeight:'100vh', display:'flex',
+      alignItems:'center', justifyContent:'center', background:'#f7f5f0'
     }}>
-      <div style={{
-        fontFamily: "'Playfair Display', serif",
-        fontSize: '1.5rem',
-        color: '#b5893a',
-      }}>
-        Organized<span style={{ color: '#0d0c0a' }}>.</span>
+      <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.5rem', color:'#b5893a' }}>
+        Organized<span style={{ color:'#0d0c0a' }}>.</span>
       </div>
     </div>
   )
 
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/:slug" element={<ClientPage />} />
-      <Route
-        path="/auth"
-        element={<Auth session={session} onAuth={setSession} />}
-      />
-      <Route
-        path="/dashboard/*"
-        element={
-          session
-            ? <Dashboard session={session} />
-            : <Navigate to="/auth" replace />
-        }
+      <Route path="/"           element={<Landing />} />
+      <Route path="/:slug"      element={<ClientPage />} />
+      <Route path="/auth"       element={<Auth onAuth={setSession} />} />
+      <Route path="/dashboard/*"
+        element={session ? <Dashboard session={session} /> : <Navigate to="/auth" replace />}
       />
     </Routes>
   )
