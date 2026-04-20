@@ -26,25 +26,26 @@ export default function App() {
   }
 
   useEffect(() => {
-    // onAuthStateChange fires INITIAL_SESSION immediately on mount —
-    // no need for a separate getSession() call.
+    // ── Init: getSession + finally guarantees loading always ends ──
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+        await checkOnboarding(session)
+      } catch (err) {
+        console.error('App init error:', err)
+      } finally {
+        setLoading(false) // always called, no matter what
+      }
+    }
+    init()
+
+    // ── Listen for auth changes after init ──
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session)
-
-        if (event === 'INITIAL_SESSION') {
-          // First event on page load — always exits loading state
-          await checkOnboarding(session)
-          setLoading(false)
-        }
-
-        if (event === 'SIGNED_IN') {
-          await checkOnboarding(session)
-        }
-
-        if (event === 'SIGNED_OUT') {
-          setOnboarded(false)
-        }
+        if (event === 'SIGNED_IN')  await checkOnboarding(session)
+        if (event === 'SIGNED_OUT') setOnboarded(false)
       }
     )
 
@@ -64,17 +65,13 @@ export default function App() {
         fontFamily: "'Playfair Display', serif",
         fontSize: '1.5rem',
         color: '#b5893a',
-        letterSpacing: '.02em',
       }}>
         Organized<span style={{ color: '#0d0c0a' }}>.</span>
       </div>
     </div>
   )
 
-  // ── 3 states ─────────────────────────────────────────────────
-  // 1. No session          → /auth (or landing)
-  // 2. Session, no workspace → /auth (onboarding)
-  // 3. Session + workspace → /dashboard
+  // ── 3-state routing ──────────────────────────────────────────
   const isReady = !!(session && onboarded)
 
   return (
