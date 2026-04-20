@@ -7,45 +7,21 @@ import Dashboard  from './pages/Dashboard'
 import ClientPage from './pages/ClientPage'
 
 export default function App() {
-  const [session,   setSession]   = useState(null)
-  const [onboarded, setOnboarded] = useState(false)
-  const [loading,   setLoading]   = useState(true)
-
-  async function checkOnboarding(sess) {
-    if (!sess) { setOnboarded(false); return }
-    try {
-      const { data } = await supabase
-        .from('workspaces')
-        .select('id')
-        .eq('user_id', sess.user.id)
-        .maybeSingle()
-      setOnboarded(!!data)
-    } catch {
-      setOnboarded(false)
-    }
-  }
+  const [session, setSession] = useState(undefined) // undefined = still loading
+  const [ready,   setReady]   = useState(false)
 
   useEffect(() => {
-    // ── Init: getSession + finally guarantees loading always ends ──
-    const init = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        setSession(session)
-        await checkOnboarding(session)
-      } catch (err) {
-        console.error('App init error:', err)
-      } finally {
-        setLoading(false) // always called, no matter what
-      }
-    }
-    init()
+    // Simple session check — no extra queries, guaranteed to resolve
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data?.session ?? null)
+      setReady(true)
+    })
 
-    // ── Listen for auth changes after init ──
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session)
-        if (event === 'SIGNED_IN')  await checkOnboarding(session)
-        if (event === 'SIGNED_OUT') setOnboarded(false)
+      (event, session) => {
+        // Only update session — no redirects, no extra queries
+        // Route guards below handle all navigation logic
+        setSession(session ?? null)
       }
     )
 
@@ -53,7 +29,7 @@ export default function App() {
   }, [])
 
   // ── Splash ───────────────────────────────────────────────────
-  if (loading) return (
+  if (!ready) return (
     <div style={{
       minHeight: '100vh',
       display: 'flex',
@@ -71,35 +47,32 @@ export default function App() {
     </div>
   )
 
-  // ── 3-state routing ──────────────────────────────────────────
-  const isReady = !!(session && onboarded)
-
   return (
     <Routes>
+      {/* Public */}
       <Route path="/" element={<Landing />} />
+      <Route path="/:slug" element={<ClientPage />} />
 
+      {/* Auth — Auth.jsx handles session detection and workspace routing internally */}
       <Route
         path="/auth"
         element={
-          isReady
-            ? <Navigate to="/dashboard" replace />
-            : <Auth
-                onAuth={setSession}
-                onOnboarded={() => setOnboarded(true)}
-              />
+          <Auth
+            session={session}
+            onAuth={setSession}
+          />
         }
       />
 
+      {/* Dashboard — only if session exists */}
       <Route
         path="/dashboard/*"
         element={
-          !session   ? <Navigate to="/auth" replace /> :
-          !onboarded ? <Navigate to="/auth" replace /> :
-          <Dashboard session={session} />
+          session
+            ? <Dashboard session={session} />
+            : <Navigate to="/auth" replace />
         }
       />
-
-      <Route path="/:slug" element={<ClientPage />} />
     </Routes>
   )
 }
