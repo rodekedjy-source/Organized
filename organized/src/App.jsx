@@ -5,15 +5,16 @@ import Landing    from './pages/Landing'
 import Auth       from './pages/Auth'
 import Dashboard  from './pages/Dashboard'
 import ClientPage from './pages/ClientPage'
-// SENTRY TEST - DELETE AFTER
-if (window.location.search.includes('sentry_test')) {
-  throw new Error('Sentry test from Organized.')
-}
-
 
 export default function App() {
   const [session, setSession] = useState(null)
   const [ready,   setReady]   = useState(false)
+// SENTRY TEST - DELETE AFTER
+useEffect(() => {
+  if (window.location.search.includes('sentry_test')) {
+    throw new Error('Sentry test - Organized.')
+  }
+}, [])
 
   useEffect(() => {
     // Init — catch all errors, always exit splash
