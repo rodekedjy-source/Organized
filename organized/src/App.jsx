@@ -5,6 +5,11 @@ import Landing    from './pages/Landing'
 import Auth       from './pages/Auth'
 import Dashboard  from './pages/Dashboard'
 import ClientPage from './pages/ClientPage'
+// SENTRY TEST - DELETE AFTER
+if (window.location.search.includes('sentry_test')) {
+  throw new Error('Sentry test from Organized.')
+}
+
 
 export default function App() {
   const [session, setSession] = useState(null)
