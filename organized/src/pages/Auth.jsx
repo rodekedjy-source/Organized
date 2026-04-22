@@ -111,6 +111,8 @@ export default function Auth({ onAuth }) {
   const [form, setForm] = useState({
     full_name:'', email:'', password:'', confirm_password:'',
     business_name:'', business_type:'',
+    address_street:'', address_city:'', address_province:'', address_postal:'',
+    address_country:'Canada', share_address:false,
   })
   const [otp, setOtp] = useState(['','','','','',''])
   const navigate = useNavigate()
@@ -219,11 +221,17 @@ export default function Auth({ onAuth }) {
     await supabase.auth.resend({type:'signup',email:form.email})
   }
 
-  // ── STEP 3 — Create workspace ─────────────────────────────────
+  // ── STEP 3 — Business info (goes to step 4) ──────────────────
   async function submitStep3(e){
     e.preventDefault();setError('')
     if(!form.business_name.trim()) return setError('Please enter your business name.')
     if(!form.business_type)        return setError('Please select a business type.')
+    setStep(4)
+  }
+
+  // ── STEP 4 — Address + create workspace ───────────────────────
+  async function submitStep4(e){
+    e.preventDefault();setError('')
     setLoading(true)
     try{
       const{data:{user}}=await supabase.auth.getUser()
@@ -247,6 +255,12 @@ export default function Auth({ onAuth }) {
       const{error:wsError}=await supabase.from('workspaces').insert({
         user_id:user.id, name:form.business_name,
         slug, workspace_type_id:wt?.id||null,
+        address_street:  form.address_street||null,
+        address_city:    form.address_city||null,
+        address_province:form.address_province||null,
+        address_postal:  form.address_postal||null,
+        address_country: form.address_country||'Canada',
+        share_address:   form.share_address||false,
       })
       if(wsError) throw wsError
 
@@ -295,7 +309,7 @@ export default function Auth({ onAuth }) {
     </div>
   )
 
-  const progress = mode==='login'?100:oauthFlow?100:(step/3)*100
+  const progress = mode==='login'?100:oauthFlow?100:(step/4)*100
   const strength = getStrength(form.password)
 
   return(
@@ -321,7 +335,7 @@ export default function Auth({ onAuth }) {
           </div>
           {mode==='signup'&&!oauthFlow&&(
             <div className="auth-steps-preview">
-              {[{n:1,label:'Account'},{n:2,label:'Verify email'},{n:3,label:'Your business'}].map(s=>(
+              {[{n:1,label:'Account'},{n:2,label:'Verify email'},{n:3,label:'Your business'},{n:4,label:'Location'}].map(s=>(
                 <div key={s.n} className={`auth-step-prev ${step>s.n?'done':''}`}>
                   <div className={`auth-step-dot ${step===s.n?'active':''} ${step>s.n?'done-dot':''}`}>
                     {step>s.n?'✓':s.n}
@@ -467,21 +481,13 @@ export default function Auth({ onAuth }) {
             {/* STEP 3 */}
             {mode==='signup'&&step===3&&(
               <form onSubmit={submitStep3}>
-                <div className="auth-step-label">{oauthFlow?'One last thing':'Step 3 of 3'}</div>
+                <div className="auth-step-label">{oauthFlow?'Step 1 of 2':'Step 3 of 4'}</div>
                 <div className="auth-title">Your business</div>
                 <div className="auth-sub">
                   {oauthFlow
                     ?`Welcome${form.full_name?', '+form.full_name.split(' ')[0]:''}! Tell us about your business.`
                     :"Two things and you're in."}
                 </div>
-                {oauthFlow&&(
-                  <div className="auth-hint">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
-                    </svg>
-                    Location, bio, and logo can be added in your dashboard settings.
-                  </div>
-                )}
                 {error&&<div className="auth-error">{error}</div>}
                 <div className="auth-field"><label>Business name</label>
                   <input className="auth-input" value={form.business_name}
@@ -501,11 +507,70 @@ export default function Auth({ onAuth }) {
                   </div>
                 </div>
                 <button type="submit" className="btn-primary btn-gold" disabled={loading}>
-                  {loading?<><div className="spinner"/>Creating workspace...</>:'Go to my dashboard'}
+                  Continue
                 </button>
                 {!oauthFlow&&(
                   <button type="button" className="btn-ghost" onClick={()=>setStep(2)}>Back</button>
                 )}
+              </form>
+            )}
+
+            {/* STEP 4 — Address */}
+            {mode==='signup'&&step===4&&(
+              <form onSubmit={submitStep4}>
+                <div className="auth-step-label">{oauthFlow?'Step 2 of 2':'Step 4 of 4'}</div>
+                <div className="auth-title">Your location</div>
+                <div className="auth-sub">Help clients find you. You can always update this later in Settings.</div>
+                {error&&<div className="auth-error">{error}</div>}
+                <div className="auth-field"><label>Street address</label>
+                  <input className="auth-input" value={form.address_street}
+                    onChange={e=>set('address_street',e.target.value)}
+                    placeholder="e.g. 123 Rue Sainte-Catherine"/>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem'}}>
+                  <div className="auth-field"><label>City</label>
+                    <input className="auth-input" value={form.address_city}
+                      onChange={e=>set('address_city',e.target.value)}
+                      placeholder="e.g. Montréal"/>
+                  </div>
+                  <div className="auth-field"><label>Province</label>
+                    <input className="auth-input" value={form.address_province}
+                      onChange={e=>set('address_province',e.target.value)}
+                      placeholder="e.g. QC"/>
+                  </div>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.75rem'}}>
+                  <div className="auth-field"><label>Postal code</label>
+                    <input className="auth-input" value={form.address_postal}
+                      onChange={e=>set('address_postal',e.target.value)}
+                      placeholder="e.g. H2X 1Y3"/>
+                  </div>
+                  <div className="auth-field"><label>Country</label>
+                    <input className="auth-input" value={form.address_country}
+                      onChange={e=>set('address_country',e.target.value)}
+                      placeholder="Canada"/>
+                  </div>
+                </div>
+                <div style={{display:'flex',alignItems:'flex-start',gap:'.75rem',padding:'1rem',background:'#f7f5f0',borderRadius:'10px',marginBottom:'1.25rem',cursor:'pointer'}}
+                  onClick={()=>set('share_address',!form.share_address)}>
+                  <div style={{width:'20px',height:'20px',borderRadius:'5px',border:`2px solid ${form.share_address?'#b5893a':'#d0ccc5'}`,background:form.share_address?'#b5893a':'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:'1px',transition:'all .15s'}}>
+                    {form.share_address&&<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                  </div>
+                  <div>
+                    <div style={{fontSize:'.82rem',fontWeight:500,color:'#0d0c0a',marginBottom:'.2rem'}}>Share my address with clients</div>
+                    <div style={{fontSize:'.72rem',color:'#7a7672',lineHeight:1.5}}>When enabled, confirmed bookings will include a "Get directions" button in the email.</div>
+                  </div>
+                </div>
+                <button type="submit" className="btn-primary btn-gold" disabled={loading}>
+                  {loading?<><div className="spinner"/>Setting up your dashboard...</>:'Go to my dashboard →'}
+                </button>
+                <button type="button" className="btn-ghost" onClick={()=>setStep(3)}>Back</button>
+                <div className="auth-hint" style={{marginTop:'1rem',background:'#fdf9f2',borderRadius:'8px'}}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b5893a" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                  </svg>
+                  <span style={{color:'#7a7672'}}>Don't forget to <strong style={{color:'#b5893a'}}>complete your business profile</strong> and <strong style={{color:'#b5893a'}}>publish your page</strong> to start receiving bookings.</span>
+                </div>
               </form>
             )}
 
