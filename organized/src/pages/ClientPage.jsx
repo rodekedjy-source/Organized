@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { supabase } from '../supabaseClient'
+import { supabase } from '../lib/supabase'
 
 // ─── CONSTANTS ──────────────────────────────────────────────────────────────
 
