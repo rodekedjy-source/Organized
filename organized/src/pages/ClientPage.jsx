@@ -202,6 +202,7 @@ export default function ClientPage() {
   async function submitBooking(e) {
     e.preventDefault()
     if (!bookForm.name) return setBookError('Please enter your name.')
+    if (!bookForm.email && !bookForm.phone) return setBookError('Please provide at least an email or a phone number to receive your confirmation.')
     if (!selectedDate || !selectedTime) return setBookError('Please select a date and time.')
     setBooking(true)
     setBookError('')
@@ -493,11 +494,11 @@ export default function ClientPage() {
                       <input value={bookForm.name} onChange={e => setBookForm(f=>({...f,name:e.target.value}))} placeholder="e.g. Amara Diallo" required/>
                     </div>
                     <div className="cp-form-field">
-                      <label>Email</label>
+                      <label>Email <span style={{color:'#b5893a',fontSize:'.8rem',fontWeight:400}}>(at least one required)</span></label>
                       <input type="email" value={bookForm.email} onChange={e => setBookForm(f=>({...f,email:e.target.value}))} placeholder="your@email.com"/>
                     </div>
                     <div className="cp-form-field">
-                      <label>Phone</label>
+                      <label>Phone <span style={{color:'#b5893a',fontSize:'.8rem',fontWeight:400}}>(at least one required)</span></label>
                       <input value={bookForm.phone} onChange={e => setBookForm(f=>({...f,phone:e.target.value}))} placeholder="+1 (514) 555-0123"/>
                     </div>
                     <div className="cp-form-field">
