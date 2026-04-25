@@ -1310,10 +1310,20 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
             <button className="btn btn-primary btn-sm" style={{marginTop:'.75rem'}} onClick={()=>{navigator.clipboard?.writeText(`https://beorganized.io/${workspace?.slug||''}`);toast(t(lang,'link_copied'))}}>{t(lang,'copy_booking_link')}</button>
           </div>
         ):(
-          <table className="tbl">
-            <thead><tr><th>Client</th><th>Service</th><th>Time</th><th>Amount</th><th>Status</th></tr></thead>
-            <tbody>{appts.map(a=>(<tr key={a.id}><td className="tbl-name">{a.client_name}</td><td>{svcName(a)}</td><td>{new Date(a.scheduled_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td className="tbl-amount">{fmtRev(a.amount)}</td><td><span className={`badge badge-${a.status}`}>{a.status}</span></td></tr>))}</tbody>
-          </table>
+          <div>
+            {appts.map(a=>(
+              <div key={a.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'.85rem 1.25rem',borderBottom:'1px solid var(--border)',gap:'.75rem'}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:600,fontSize:'.88rem',color:'var(--ink)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.client_name}</div>
+                  <div style={{fontSize:'.72rem',color:'var(--ink-3)',marginTop:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{svcName(a)}</div>
+                </div>
+                <div style={{textAlign:'right',flexShrink:0}}>
+                  <div style={{fontSize:'.85rem',fontWeight:600,color:'var(--ink)'}}>{new Date(a.scheduled_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+                  <div style={{marginTop:3}}><span className={`badge badge-${a.status}`} style={{fontSize:'.65rem'}}>{a.status}</span></div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
       {showRevenue&&<RevenuePanel appts={allAppts} onClose={()=>setShowRevenue(false)}/>}
@@ -3095,7 +3105,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card-body{padding:1.25rem 1.4rem}
 
 /* NEXT UP BANNER */
-.next-up-banner{background:var(--ink);border-radius:16px;padding:1.1rem 1.25rem;display:flex;flex-direction:column;margin-bottom:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.next-up-banner{background:#1a1814;border-radius:16px;padding:1.1rem 1.25rem;display:flex;flex-direction:column;margin-bottom:1.25rem;box-shadow:0 4px 24px rgba(0,0,0,.28)}
 .next-up-left{display:flex;align-items:center;gap:.85rem;flex:1;min-width:0}
 .next-up-icon{width:38px;height:38px;border-radius:50%;background:rgba(197,169,106,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold)}
 .next-up-icon svg{width:17px;height:17px}
