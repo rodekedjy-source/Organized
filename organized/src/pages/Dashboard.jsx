@@ -2897,7 +2897,7 @@ export default function Dashboard() {
           <button className={`vt-btn${!clientView?' active':''}`} onClick={()=>setClientView(false)}>Dash</button>
           <button className={`vt-btn${clientView?' active':''}`} onClick={()=>setClientView(true)}>Client</button>
         </div>
-        <div className="av-btn" onClick={()=>navigateTo('settings')}>{initials}</div>
+        <div className="av-btn">{initials}</div>
       </div>
 
       {/* SIDEBAR */}
@@ -2986,7 +2986,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .view-toggle{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0}
 .vt-btn{padding:.3rem .75rem;border:none;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:500;background:transparent;color:var(--ink-3);transition:all .15s}
 .vt-btn.active{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.av-btn{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-family:'Playfair Display',serif}
+.av-btn{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif}
 
 /* SIDEBAR */
 .overlay-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:60;backdrop-filter:blur(2px)}
