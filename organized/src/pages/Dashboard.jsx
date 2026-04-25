@@ -1291,7 +1291,7 @@ function Overview({ workspace, session, ownerData, toast, setPage, refetchWorksp
         <TopServiceInsight appts={allAppts}/>
         <div className="card" style={{marginBottom:0}}>
           <div className="card-head">
-            <div className="card-title">{t(lang,'calendar')}</div>
+            <div className="card-title" style={{cursor:'pointer'}} onClick={()=>setPage('availability')}>{t(lang,'calendar')}</div>
             <span style={{fontSize:'.72rem',color:'var(--ink-3)'}}>{t(lang,'tap_date')}</span>
           </div>
           <div className="card-body"><InteractiveCal allAppts={allAppts} blockedDates={blockedDates} onDayClick={setSelectedDay}/></div>
@@ -2965,10 +2965,7 @@ export default function Dashboard() {
                     ? <img src={ownerData.avatar_url} alt="avatar" style={{width:'62vw',height:'62vw',maxWidth:240,maxHeight:240,borderRadius:'50%',objectFit:'cover',boxShadow:'0 0 0 3px rgba(197,169,106,.6), 0 24px 80px rgba(0,0,0,.5)'}}/>
                     : <div style={{width:'62vw',height:'62vw',maxWidth:240,maxHeight:240,borderRadius:'50%',background:'var(--gold)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Playfair Display',serif",fontSize:'4rem',fontWeight:700,color:'#1a1814',boxShadow:'0 0 0 3px rgba(197,169,106,.6), 0 24px 80px rgba(0,0,0,.5)'}}>{initials}</div>
                   }
-                  {/* Pencil edit badge */}
-                  <div style={{position:'absolute',bottom:'4%',right:'4%',width:36,height:36,borderRadius:'50%',background:'rgba(30,27,23,.9)',border:'1px solid rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,.4)'}}>
-                    <svg viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.6" width="14" height="14"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/></svg>
-                  </div>
+
                 </div>
                 {/* Name */}
                 <div style={{textAlign:'center'}}>
