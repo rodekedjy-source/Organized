@@ -2913,7 +2913,7 @@ export default function Dashboard() {
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" width="13" height="13"><path d="M10 3L5 8l5 5"/></svg>
             </button>
           )}
-          <div className="brand" onClick={()=>{setPage('overview');setPageStack([])}}>
+          <div className="brand" onClick={()=>{setPage('overview');setPageStack([]);window.scrollTo({top:0,behavior:'smooth'})}}>
             Organized<span className="brand-dot">.</span>
           </div>
         </div>
@@ -2932,8 +2932,8 @@ export default function Dashboard() {
           <button className="sb-close" onClick={()=>setMenuOpen(false)}>✕</button>
         </div>
         <div className="sb-user" style={{flexDirection:'column',alignItems:'center',padding:'1.25rem',gap:'.6rem'}}>
-          {/* Avatar — click to expand */}
-          <div style={{position:'relative',cursor:'pointer'}} onClick={()=>setAvatarExpanded(o=>!o)}>
+          {/* Avatar — click opens full overlay */}
+          <div style={{position:'relative',cursor:'pointer'}} onClick={()=>setAvatarExpanded(true)}>
             {ownerData?.avatar_url
               ? <img src={ownerData.avatar_url} alt="avatar" style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',border:'2px solid var(--gold)'}}/>
               : <div className="sb-av" style={{width:56,height:56,fontSize:'1.1rem'}}>{initials}</div>
@@ -2943,45 +2943,88 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Expanded photo upload */}
+          {/* Full-screen avatar overlay — premium style */}
           {avatarExpanded&&(
-            <div style={{width:'100%',background:'var(--bg)',borderRadius:10,padding:'.75rem',border:'1px solid var(--border)',textAlign:'center',animation:'fadeIn .15s ease'}}>
-              <div style={{fontSize:'.7rem',color:'var(--ink-3)',marginBottom:'.5rem'}}>
-                {avatarUploading ? 'Uploading...' : 'Update profile photo'}
-              </div>
-              <label style={{display:'inline-block',cursor:'pointer'}}>
-                <div style={{background:'var(--gold)',color:'var(--ink)',borderRadius:8,padding:'.4rem .9rem',fontSize:'.75rem',fontWeight:600,display:'inline-flex',alignItems:'center',gap:'.35rem'}}>
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" width="12" height="12"><path d="M8 3v8M4 7l4-4 4 4"/><path d="M2 13h12"/></svg>
-                  Choose photo
-                </div>
-                <input type="file" accept="image/*" style={{display:'none'}} disabled={avatarUploading} onChange={async(e)=>{
-                  const file=e.target.files?.[0]; if(!file||!session) return
-                  setAvatarUploading(true)
-                  try {
-                    const ext=file.name.split('.').pop()
-                    const path=`${session.user.id}/avatar.${ext}`
-                    const {error:upErr}=await supabase.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type})
-                    if(upErr) throw upErr
-                    const {data:{publicUrl}}=supabase.storage.from('avatars').getPublicUrl(path)
-                    const bust=publicUrl+'?t='+Date.now()
-                    await supabase.from('users').update({avatar_url:bust}).eq('id',session.user.id)
-                    setOwnerData(d=>({...d,avatar_url:bust}))
-                    setAvatarExpanded(false)
-                    toast('Profile photo updated')
-                  } catch(err) { toast('Upload failed — try again') }
-                  finally { setAvatarUploading(false) }
-                }}/>
-              </label>
+            <div onClick={()=>setAvatarExpanded(false)} style={{position:'fixed',inset:0,zIndex:200,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-between',paddingBottom:'3rem',animation:'fadeIn .22s ease',overflow:'hidden'}}>
+              {/* Blurred ambient background */}
+              <div style={{position:'absolute',inset:0,background:'#1a1814',zIndex:0}}/>
               {ownerData?.avatar_url&&(
-                <button onClick={async()=>{
-                  await supabase.from('users').update({avatar_url:null}).eq('id',session.user.id)
-                  setOwnerData(d=>({...d,avatar_url:null}))
-                  setAvatarExpanded(false)
-                  toast('Photo removed')
-                }} style={{display:'block',width:'100%',marginTop:'.4rem',background:'none',border:'none',fontSize:'.7rem',color:'var(--ink-3)',cursor:'pointer',padding:'.25rem'}}>
-                  Remove photo
-                </button>
+                <img src={ownerData.avatar_url} alt="" aria-hidden style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',filter:'blur(40px) brightness(.45) saturate(1.4)',transform:'scale(1.1)',zIndex:1}}/>
               )}
+              {!ownerData?.avatar_url&&(
+                <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 40%, rgba(197,169,106,.25) 0%, transparent 70%)',zIndex:1}}/>
+              )}
+
+              {/* Close tap area top */}
+              <div style={{flex:1,width:'100%',zIndex:2}}/>
+
+              {/* Avatar large */}
+              <div onClick={e=>e.stopPropagation()} style={{position:'relative',zIndex:3,display:'flex',flexDirection:'column',alignItems:'center',gap:'1rem'}}>
+                <div style={{position:'relative'}}>
+                  {ownerData?.avatar_url
+                    ? <img src={ownerData.avatar_url} alt="avatar" style={{width:'62vw',height:'62vw',maxWidth:240,maxHeight:240,borderRadius:'50%',objectFit:'cover',boxShadow:'0 0 0 3px rgba(197,169,106,.6), 0 24px 80px rgba(0,0,0,.5)'}}/>
+                    : <div style={{width:'62vw',height:'62vw',maxWidth:240,maxHeight:240,borderRadius:'50%',background:'var(--gold)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Playfair Display',serif",fontSize:'4rem',fontWeight:700,color:'#1a1814',boxShadow:'0 0 0 3px rgba(197,169,106,.6), 0 24px 80px rgba(0,0,0,.5)'}}>{initials}</div>
+                  }
+                  {/* Pencil edit badge */}
+                  <div style={{position:'absolute',bottom:'4%',right:'4%',width:36,height:36,borderRadius:'50%',background:'rgba(30,27,23,.9)',border:'1px solid rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,.4)'}}>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.6" width="14" height="14"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/></svg>
+                  </div>
+                </div>
+                {/* Name */}
+                <div style={{textAlign:'center'}}>
+                  <div style={{color:'#fff',fontWeight:600,fontSize:'1.1rem',textShadow:'0 1px 8px rgba(0,0,0,.5)'}}>{ownerData?.full_name||firstName(workspace,session)}</div>
+                  <div style={{color:'rgba(255,255,255,.4)',fontSize:'.75rem',marginTop:3}}>{session?.user?.email}</div>
+                </div>
+              </div>
+
+              {/* Spacer */}
+              <div style={{flex:1,zIndex:2}}/>
+
+              {/* Bottom actions — circular buttons */}
+              <div onClick={e=>e.stopPropagation()} style={{position:'relative',zIndex:3,display:'flex',gap:'2rem',alignItems:'flex-end',justifyContent:'center',paddingBottom:'.5rem'}}>
+                {/* Change photo */}
+                <label style={{cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:'.5rem'}}>
+                  <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(30,27,23,.85)',border:'1px solid rgba(255,255,255,.12)',backdropFilter:'blur(8px)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px rgba(0,0,0,.35)'}}>
+                    {avatarUploading
+                      ? <div style={{width:18,height:18,border:'2px solid rgba(255,255,255,.3)',borderTopColor:'#fff',borderRadius:'50%',animation:'spin .7s linear infinite'}}/>
+                      : <svg viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,.9)" strokeWidth="1.5" width="20" height="20"><path d="M1 12V5a1 1 0 011-1h1.5l1-2h5l1 2H13a1 1 0 011 1v7a1 1 0 01-1 1H2a1 1 0 01-1-1z"/><circle cx="8" cy="8.5" r="2"/></svg>
+                    }
+                  </div>
+                  <span style={{color:'rgba(255,255,255,.7)',fontSize:'.72rem',fontWeight:500}}>{avatarUploading?'Uploading…':'Change photo'}</span>
+                  <input type="file" accept="image/*" style={{display:'none'}} disabled={avatarUploading} onChange={async(e)=>{
+                    const file=e.target.files?.[0]; if(!file||!session) return
+                    setAvatarUploading(true)
+                    try {
+                      const ext=file.name.split('.').pop()
+                      const path=`${session.user.id}/avatar.${ext}`
+                      const {error:upErr}=await supabase.storage.from('avatars').upload(path,file,{upsert:true,contentType:file.type})
+                      if(upErr) throw upErr
+                      const {data:{publicUrl}}=supabase.storage.from('avatars').getPublicUrl(path)
+                      const bust=publicUrl+'?t='+Date.now()
+                      await supabase.from('users').update({avatar_url:bust}).eq('id',session.user.id)
+                      setOwnerData(d=>({...d,avatar_url:bust}))
+                      setAvatarExpanded(false)
+                      toast('Profile photo updated')
+                    } catch(err){ toast('Upload failed — try again') }
+                    finally{ setAvatarUploading(false) }
+                  }}/>
+                </label>
+
+                {/* Remove photo — only if photo exists */}
+                {ownerData?.avatar_url&&(
+                  <div onClick={async()=>{
+                    await supabase.from('users').update({avatar_url:null}).eq('id',session.user.id)
+                    setOwnerData(d=>({...d,avatar_url:null}))
+                    setAvatarExpanded(false)
+                    toast('Photo removed')
+                  }} style={{cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:'.5rem'}}>
+                    <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(30,27,23,.85)',border:'1px solid rgba(255,255,255,.12)',backdropFilter:'blur(8px)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px rgba(0,0,0,.35)'}}>
+                      <svg viewBox="0 0 16 16" fill="none" stroke="rgba(255,255,255,.9)" strokeWidth="1.5" width="18" height="18"><path d="M3 4h10M5 4V2h6v2M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg>
+                    </div>
+                    <span style={{color:'rgba(255,255,255,.7)',fontSize:'.72rem',fontWeight:500}}>Remove</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
