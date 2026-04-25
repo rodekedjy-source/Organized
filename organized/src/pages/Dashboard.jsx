@@ -2272,8 +2272,8 @@ function Availability({ workspace, toast, lang='en' }) {
                   minWidth:80,padding:'.38rem .9rem',borderRadius:20,border:'2px solid',
                   fontSize:'.78rem',fontWeight:700,cursor:'pointer',fontFamily:'inherit',
                   transition:'all .18s',flexShrink:0,letterSpacing:'.02em',
-                  borderColor:day.is_open?'var(--ink)':'var(--border-2)',
-                  background:day.is_open?'var(--ink)':'transparent',
+                  borderColor:day.is_open?'#1a1814':'var(--border-2)',
+                  background:day.is_open?'#1a1814':'transparent',
                   color:day.is_open?'#fff':'var(--ink-3)',
                   boxShadow:day.is_open?'0 2px 8px rgba(0,0,0,.15)':'none'
                 }}>
@@ -3254,7 +3254,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1rem;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:500;transition:all .15s;white-space:nowrap}
-.btn-primary{background:var(--ink);color:#fff}
+.btn-primary{background:#1a1814;color:#fff}
 .btn-primary:hover{opacity:.88}
 .btn-primary:disabled{opacity:.45;cursor:not-allowed}
 .btn-secondary{background:var(--bg);border:1px solid var(--border);color:var(--ink-2)}
