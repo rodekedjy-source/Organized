@@ -2694,12 +2694,25 @@ function ClientPage({ workspace, onSwitchToDash }) {
   const [calMonth,setCalMonth]=useState(()=>{ const d=new Date(); return {y:d.getFullYear(),m:d.getMonth()} })
   const [slots,setSlots]=useState([])
   const [loadingSlots,setLoadingSlots]=useState(false)
+  const [contactError,setContactError]=useState('')
+  const [dragStartY,setDragStartY]=useState(null)
+  const [dragDY,setDragDY]=useState(0)
   const [booking,setBooking]=useState(false)
   const [booked,setBooked]=useState(false)
   const [faqOpen,setFaqOpen]=useState(null)
   const [cpToast,setCpToast]=useState('')
 
   function cpNotify(msg){setCpToast(msg);setTimeout(()=>setCpToast(''),3000)}
+
+  // ── Scroll lock when booking modal is open ───────────────────────────────
+  useEffect(()=>{
+    if(modal){
+      document.body.style.overflow='hidden'
+    } else {
+      document.body.style.overflow=''
+    }
+    return ()=>{ document.body.style.overflow='' }
+  },[modal])
 
   // ── Realtime availability — reflects owner changes instantly ──────────────
   useEffect(()=>{
@@ -3078,11 +3091,18 @@ function ClientPage({ workspace, onSwitchToDash }) {
       {modal&&(
         <div
           style={{position:'fixed',inset:0,background:'rgba(13,12,10,.62)',backdropFilter:'blur(8px)',zIndex:100,display:'flex',alignItems:'flex-end',justifyContent:'center'}}
-          onClick={()=>{setModal(null);setBookStep(1);setBooked(false);setBookForm({name:'',email:'',phone:'',date:'',time:'',notes:''});setSlots([])}}>
+          onClick={()=>{setModal(null);setBookStep(1);setBooked(false);setBookForm({name:'',email:'',phone:'',date:'',time:'',notes:''});setSlots([]);setDragDY(0);setDragStartY(null)}}>
           <div
-            style={{background:'#fff',width:'100%',maxWidth:520,borderRadius:'22px 22px 0 0',maxHeight:'91vh',overflowY:'auto',boxShadow:'0 -8px 48px rgba(0,0,0,.18)'}}
-            onClick={e=>e.stopPropagation()}>
-            <div style={{width:38,height:4,borderRadius:2,background:'#e4e0d8',margin:'14px auto 0'}}/>
+            style={{background:'#fff',width:'100%',maxWidth:520,borderRadius:'22px 22px 0 0',maxHeight:'91vh',overflowY:'auto',boxShadow:'0 -8px 48px rgba(0,0,0,.18)',transform:`translateY(${Math.max(0,dragDY)}px)`,transition:dragStartY?'none':'transform .3s ease'}}
+            onClick={e=>e.stopPropagation()}
+            onTouchStart={e=>setDragStartY(e.touches[0].clientY)}
+            onTouchMove={e=>{if(dragStartY===null)return;const dy=e.touches[0].clientY-dragStartY;if(dy>0)setDragDY(dy)}}
+            onTouchEnd={()=>{if(dragDY>90){setModal(null);setBookStep(1);setBooked(false);setBookForm({name:'',email:'',phone:'',date:'',time:'',notes:''});setSlots([]);setDragDY(0);setDragStartY(null)}else{setDragDY(0);setDragStartY(null)}}}>
+            {/* Drag handle — tap or swipe down to close */}
+            <div
+              style={{width:38,height:4,borderRadius:2,background:'#ccc',margin:'14px auto 0',cursor:'pointer'}}
+              onClick={()=>{setModal(null);setBookStep(1);setBooked(false);setBookForm({name:'',email:'',phone:'',date:'',time:'',notes:''});setSlots([]);setDragDY(0)}}
+              title="Close"/>
 
             {booked?(
               <div style={{padding:'2.75rem 2rem 3.5rem',textAlign:'center'}}>
@@ -3126,10 +3146,19 @@ function ClientPage({ workspace, onSwitchToDash }) {
                           onBlur={e=>e.target.style.borderColor='#e4e0d8'}/>
                       </div>
                     ))}
-                    <div style={{fontSize:'.72rem',color:'#b5a898',margin:'10px 0 22px'}}>Email or phone required — used to confirm your appointment.</div>
+                    <div style={{fontSize:'.72rem',color:'#b5a898',margin:'10px 0 14px'}}>Email or phone required — used to confirm your appointment.</div>
+                    {contactError&&(
+                      <div style={{background:'#fff5f5',border:'1px solid #fecaca',borderRadius:10,padding:'11px 14px',fontSize:'.82rem',color:'#c0392b',marginBottom:14,fontWeight:500}}>
+                        {contactError}
+                      </div>
+                    )}
                     <button type="button" onClick={()=>{
                       if(!bookForm.name.trim()){cpNotify('Please enter your name.');return}
-                      if(!bookForm.email.trim()&&!bookForm.phone.trim()){cpNotify('Please provide an email or phone number.');return}
+                      if(!bookForm.email.trim()&&!bookForm.phone.trim()){
+                        setContactError('Please add an email or phone number to continue.')
+                        return
+                      }
+                      setContactError('')
                       setBookStep(2)
                     }} style={{width:'100%',padding:'14px',background:'#0d0c0a',color:'#fff',border:'none',borderRadius:12,fontSize:'.9rem',fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
                       Continue
