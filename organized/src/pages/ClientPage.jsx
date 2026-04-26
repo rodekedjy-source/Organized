@@ -2701,18 +2701,36 @@ function ClientPage({ workspace, onSwitchToDash }) {
 
   function cpNotify(msg){setCpToast(msg);setTimeout(()=>setCpToast(''),3000)}
 
-  // ── Load availability once workspace is ready ───────────────────────────
+  // ── Realtime availability — reflects owner changes instantly ──────────────
   useEffect(()=>{
     if(!workspace?.id) return
-    Promise.all([
-      supabase.from('availability').select('*').eq('workspace_id',workspace.id),
-      supabase.from('blocked_dates').select('blocked_date').eq('workspace_id',workspace.id),
-      supabase.from('appointments').select('scheduled_at,ends_at,duration_min').eq('workspace_id',workspace.id).in('status',['confirmed','pending']).gte('scheduled_at',new Date().toISOString()),
-    ]).then(([av,bl,ap])=>{
+
+    async function loadAvail(){
+      const [av,bl,ap] = await Promise.all([
+        supabase.from('availability').select('*').eq('workspace_id',workspace.id),
+        supabase.from('blocked_dates').select('blocked_date').eq('workspace_id',workspace.id),
+        supabase.from('appointments')
+          .select('scheduled_at,ends_at,duration_min')
+          .eq('workspace_id',workspace.id)
+          .in('status',['confirmed','pending'])
+          .gte('scheduled_at',new Date().toISOString()),
+      ])
       setAvail(av.data||[])
       setBlocked((bl.data||[]).map(b=>b.blocked_date))
       setExistingAppts(ap.data||[])
-    })
+    }
+
+    loadAvail()
+
+    // Subscribe — owner closes a day or blocks a date → calendar updates immediately
+    const ch = supabase
+      .channel(`cp-avail-${workspace.id}`)
+      .on('postgres_changes',{event:'*',schema:'public',table:'availability',    filter:`workspace_id=eq.${workspace.id}`}, loadAvail)
+      .on('postgres_changes',{event:'*',schema:'public',table:'blocked_dates',   filter:`workspace_id=eq.${workspace.id}`}, loadAvail)
+      .on('postgres_changes',{event:'*',schema:'public',table:'appointments',    filter:`workspace_id=eq.${workspace.id}`}, loadAvail)
+      .subscribe()
+
+    return () => supabase.removeChannel(ch)
   },[workspace])
 
   function isDayOpen(dateStr){
