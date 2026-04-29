@@ -373,13 +373,25 @@ export default function ClientPage() {
       <section className="cb-hero">
         <div className="cb-hero-bg"><canvas ref={canvasRef} style={{position:'absolute',inset:0,width:'100%',height:'100%',display:'block'}} /></div>
         <div className="cb-hero-content">
-          <div className="cb-avail-tag"><span className="cb-tag-dot"/>Accepting New Clients</div>
+          <div className="cb-avail-tag"><span className="cb-tag-dot"/>
+            {activeTab==='book'?'Accepting New Clients':activeTab==='shop'?'The Edit — Curated Products':'Knowledge & Formation'}
+          </div>
           <h1 className="cb-hero-name">{workspace.name}</h1>
-          <div className="cb-hero-eyebrow">{workspace.tagline||workspace.location||'Beauty Professional'}</div>
-          {workspace.bio&&<p className="cb-hero-bio">{workspace.bio}</p>}
+          <div className="cb-hero-eyebrow">
+            {activeTab==='book' ? (workspace.tagline||workspace.location||'Beauty Professional') : activeTab==='shop' ? 'Studio-tested. Client-approved.' : 'Learn the craft behind the look.'}
+          </div>
+          {activeTab==='book' && workspace.bio && <p className="cb-hero-bio">{workspace.bio}</p>}
           <div className="cb-hero-cta">
-            <button className="cb-btn-primary" onClick={()=>document.querySelector('.cb-tabs')?.scrollIntoView({behavior:'smooth'})}>Book your Service</button>
-            <button className="cb-btn-ghost" onClick={()=>setPortfolioOpen(true)}>See our Portfolio</button>
+            {activeTab==='book' && <>
+              <button className="cb-btn-primary" onClick={()=>document.querySelector('.cb-tabs')?.scrollIntoView({behavior:'smooth'})}>Book your Service</button>
+              <button className="cb-btn-ghost" onClick={()=>setPortfolioOpen(true)}>See our Portfolio</button>
+            </>}
+            {activeTab==='shop' && <>
+              <button className="cb-btn-primary" onClick={()=>document.querySelector('.cb-tabs')?.scrollIntoView({behavior:'smooth'})}>Shop the Edit</button>
+            </>}
+            {activeTab==='learn' && <>
+              <button className="cb-btn-primary" onClick={()=>document.querySelector('.cb-tabs')?.scrollIntoView({behavior:'smooth'})}>Browse Formations</button>
+            </>}
           </div>
           <div className="cb-socials">
             {workspace.instagram&&<a href={`https://instagram.com/${workspace.instagram.replace('@','')}`} target="_blank" rel="noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>{workspace.instagram}</a>}
@@ -765,8 +777,8 @@ const CSS = `
 .cb-icon-btn:hover{border-color:var(--gold);color:var(--gold-light)}
 .cb-cart-badge{position:absolute;top:-6px;right:-6px;background:var(--gold);color:#141210;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 
-.cb-hero{min-height:100vh;padding-top:64px;position:relative;overflow:hidden;display:flex;align-items:center}
-.cb-hero-bg{position:absolute;inset:0;z-index:0}
+.cb-hero{min-height:55vh;padding-top:64px;position:relative;overflow:hidden;display:flex;align-items:center}
+.cb-hero-bg{position:absolute;inset:0;z-index:0;background:#080706}
 .cb-hero-content{position:relative;z-index:1;padding:60px 24px 80px;max-width:560px}
 .cb-avail-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.22);border-radius:100px;padding:5px 16px 5px 10px;font-size:10px;color:rgba(201,168,76,0.9);letter-spacing:.14em;text-transform:uppercase;margin-bottom:24px}
 .cb-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2.5s infinite}
@@ -775,7 +787,7 @@ const CSS = `
 .cb-hero-eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,241,.6);margin-bottom:18px}
 .cb-hero-bio{font-size:15px;color:rgba(250,246,241,.72);font-weight:300;line-height:1.8;margin-bottom:36px;max-width:380px}
 .cb-hero-cta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px}
-@media(max-width:480px){.cb-hero-cta{flex-direction:column}.cb-hero-cta button{width:100%;text-align:center}}
+@media(max-width:480px){.cb-hero{min-height:auto;padding-bottom:48px}.cb-hero-cta{flex-direction:column}.cb-hero-cta button{width:100%;text-align:center}}
 .cb-socials{display:flex;align-items:center;gap:16px}
 .cb-socials a{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(250,246,241,.5);text-decoration:none;transition:color .2s}
 .cb-socials a:hover{color:rgba(250,246,241,.85)}
@@ -973,4 +985,11 @@ const CSS = `
 .cb-cart-drawer.open{transform:translateX(0)}
 .cb-qty-btn{width:22px;height:22px;border:1px solid var(--dark-5);background:transparent;color:var(--text-muted);cursor:pointer;border-radius:1px;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .cb-qty-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+[data-theme="light"] .cb-hero-name{color:#FAF6F1}
+[data-theme="light"] .cb-hero-eyebrow{color:rgba(250,246,241,.65)}
+[data-theme="light"] .cb-hero-bio{color:rgba(250,246,241,.75)}
+[data-theme="light"] .cb-avail-tag{background:rgba(250,246,241,.12);border-color:rgba(250,246,241,.25);color:rgba(250,246,241,.85)}
+[data-theme="light"] .cb-tag-dot{background:#F0D898}
+[data-theme="light"] .cb-socials a{color:rgba(250,246,241,.5)}
+[data-theme="light"] .cb-hero-content .cb-btn-ghost{border-color:rgba(250,246,241,.3);color:rgba(250,246,241,.7)}
 `
